@@ -1,0 +1,29 @@
+# System
+.DS_Store
+.LSOverride
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# C++ Artifacts
+build/
+*.o
+*.exe
+src/pluginator
+pluginator
+*.a
+*.so
+*.dylib
+cmake-build-*/
+
+# Backups and Logs
+backups/
+logs/
+
+# Private
+plugin_versions.json
+pluginator.sh
+plugin-list.txt
+OLD/
+SERVER/
