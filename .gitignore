@@ -25,5 +25,6 @@ logs/
 plugin_versions.json
 pluginator.sh
 plugin-list.txt
+plugins.json
 OLD/
 SERVER/

@@ -1,3 +1,42 @@
+# Dev Update v1.1.6
+- Added debug logger.
+- Added debug flag for commands.
+- Adding function for checking Jenkins API.
+- Further fix of plugin status information.
+- Added function for prettier json object creation.
+- Added function for scanning plugin versions via file name.
+- Added function for scanning plugin version via respective API.
+- Added function for verifying plugin versions against installed files.
+
+# Dev Update v1.1.5
+- Further cleanup of comments and docs.
+- Fixed purpur updating progress bar.
+- Fixed plugin detection.
+- Fixed plugin status table formatting.
+- Fixed checking Modrinth API.
+- Fixed checking Spiget API.
+
+# Dev Update v1.1.4
+- Added http_client logic.
+- Added json_helper logic.
+- Added utils header file.
+- Further cleanup of functions (need to go back through and make sure there aren't any unused/forgotten shtuff).
+- Added plugins.json file.
+
+# Dev Update v1.1.3
+- Added plugin_manager logic.
+- Added purpur_manager logic.
+
+# Dev Update v1.1.2
+- Continued conversion of function logic.
+- Added "lang" organization.
+- Added lang logic.
+- Added "config" organization (for env variables and such).
+- Added config logic.
+
+# Dev Update v1.1.1
+- Continued conversion of function logic. 
+
 # Dev Update v1.1.0
 - Started migration from only using bash to C++ (original bash script will remain private unless I change my mind).
 - At least listed all current functions (will add rest of logic later).

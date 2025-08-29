@@ -1,0 +1,16 @@
+{
+    "plugins": [
+        {
+            "name": "",
+            "type": "",
+            "jType": "",
+            "resourceId": "",
+            "projectSlug": "",
+            "job":"",
+            "minecraftVersion": "",
+            "filenamePattern": "",
+            "disableOnTest": false,
+            "enabled": true
+        },
+    ]
+}

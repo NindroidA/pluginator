@@ -2,8 +2,11 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <filesystem>
 #include "logger.hpp"
 #include "plugin.hpp"
+#include "plugin_manager.hpp"
+#include "purpur_manager.hpp"
 
 using namespace std;
 
@@ -16,15 +19,21 @@ class Pluginator {
 
     Logger logger;
     vector<Plugin> plugins;
-    map<string, string> pluginVersions;
+    
+    PluginManager pluginManager;
+    PurpurManager purpurManager;
     
     void initPlugins();
+    void backup(const string& serverPath, const string& backupName);
+    void cleanupOldBackups(const string& backupName);
+    void enablePluginsForTest();
 
 public:
     Pluginator();
 
     // backup functions
-    void backup(const string& serverPath, const string& backupName);
+    void backupProduction();
+    void backupTest();
     void viewRecentBackups();
 
     // bulk jar functions
@@ -33,23 +42,23 @@ public:
 
     // purpur functions
     void checkPurpur();
-    void downloadPurpur(const string& version);
+    void downloadPurpur();
 
     // plugin functions
-    void initPluginVersions();
-    string getStoredVersion(const string& pluginName);
-    void setStoredVersion(const string& pluginName, const string& version);
-    string checkSpigotVersion(const string& resourceId);
-    string checkModrinthVersion(const string& projectSlug, const string& mcVersion);
-    void checkPluginUpdates(const string& mode); // mode -> "check" or "update"
-    void downloadPluginUpdate(const string& pluginRef, const string& versionInfo);
-    void showPluginStatus();
+    void checkPluginUpdates();
+    void downloadPluginUpdates();
+    void showPluginUpdates();
+    void scanAndUpdateVersions();
+    void scanVersionsAPI();
+    void verifyVersions();
 
     // cli functions
     void showMenu();
     void runInteractive();
+    void showConfiguration();
 
     // utils
     void disablePluginsForTest();
     string getCurrentTimestamp();
+    const vector<Plugin>& getLoadedPlugins();
 };
