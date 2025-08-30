@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(Pluginator VERSION 1.1.6)
+project(Pluginator VERSION 1.1.7)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -29,6 +29,7 @@ add_executable(pluginator
     src/json_helper.cpp
     src/plugin_manager.cpp
     src/purpur_manager.cpp
+    src/progress_bar.cpp
     src/utils.cpp
 )
 

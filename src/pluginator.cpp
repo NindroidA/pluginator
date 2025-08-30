@@ -60,7 +60,7 @@ string Pluginator::getCurrentTimestamp() {
  */
 void Pluginator::initPlugins() {
     // try to load from external config
-    if (pluginManager.initFromConfig("plugins.json")) {
+    if (pluginManager.initFromConfig("data/plugins.json")) {
         logger.success(LANG("plugin.config_loaded_external"));
 
         plugins = pluginManager.getLoadedPlugins();
@@ -70,9 +70,9 @@ void Pluginator::initPlugins() {
     }
 
     // if no config file, generate one from plugin list
-    if (exists("plugin-list.txt")) {
+    if (exists("data/plugin-list.txt")) {
         logger.debug(LANG("plugin.generating_from_list"));
-        pluginManager.generateConfigFromPluginList("plugin-list.txt");
+        pluginManager.generateConfigFromPluginList("data/plugin-list.txt");
         plugins = pluginManager.getLoadedPlugins();
         return;
     }
@@ -419,9 +419,9 @@ void Pluginator::runInteractive() {
                 string pluginsPath = Config::getInstance().getTestServerPath() + "/plugins";
                 pluginManager.scanAndConfigurePlugins(pluginsPath);
             } else if (subChoice == "2") {
-                pluginManager.generateConfigFromPluginList("plugin-list.txt");
+                pluginManager.generateConfigFromPluginList("data/plugin-list.txt");
             } else if (subChoice == "3") {
-                pluginManager.initFromConfig("plugins.json");
+                pluginManager.initFromConfig("data/plugins.json");
             }
         } else if (choice == "0") {
             logger.log(LANG("app.session_ended"));

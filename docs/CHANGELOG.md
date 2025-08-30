@@ -1,3 +1,8 @@
+# Dev Update v1.1.7
+- Cleaned up file structure and organized different files instead of having them all in root dir.
+- Added progress bar class and logic.
+- Implemented progress bar across needed functions.
+
 # Dev Update v1.1.6
 - Added debug logger.
 - Added debug flag for commands.

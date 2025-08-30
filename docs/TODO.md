@@ -1,18 +1,18 @@
 # overall jobs
-[] fix getting plugin summary from plugins.json
+[x] fix getting plugin summary from plugins.json
 [] DEEP CLEAN throughout 
 [] double check lang strings
 [] double check both interfaces have the same options/commands
 [] YA KNOW MAYBE I SHOULD STOP TRYNA BEING A LIL 'unique' BITCH AND CAPITALIZE MY COMMENTS
 
 # DEEP CLEAN (and adding docs/comments)
-[x] colors
+[] colors
 [] utils
-[x] config
-[x] http_client
-[x] json_helper
-[x] lang
-[x] logger
+[] config
+[] http_client
+[] json_helper
+[] lang
+[] logger
 [] plugin_manager
 [] purpur_manager
 [] pluginator
@@ -29,6 +29,9 @@
 [] check-plugins
 [] update-plugins
 [] plugin-status
+[] scan-versions
+[] scan-versions-api
+[] verify-versions
 [] check-purpur
 [] logs
 [] backups

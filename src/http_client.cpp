@@ -34,7 +34,7 @@ static int FancyProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t d
     
     double progress = (double)dlnow / (double)dltotal * 100.0;
     
-    // Only update every 1% or at completion
+    // only update every 1% or at completion
     static int lastPercent = -1;
     int currentPercent = (int)progress;
     
@@ -44,16 +44,16 @@ static int FancyProgressCallback(void* clientp, curl_off_t dltotal, curl_off_t d
         auto now = chrono::steady_clock::now();
         auto elapsed = chrono::duration_cast<chrono::milliseconds>(now - startTime).count() / 1000.0;
         
-        // Calculate download speed
+        // calculate download speed
         double speed = 0.0;
         if (elapsed > 0) {
             speed = (double)dlnow / elapsed; // bytes per second
         }
         
-        // Create the progress bar using utilities (cast curl_off_t to int64_t)
+        // create the progress bar using utils
         string progressBar = Utils::createProgressBar(progress, 40);
         
-        // Print the fancy progress line
+        // print the fancy shmancy progress line
         printf("\r  %s%s%s %s%5.1f%%%s %s",
             Colors::BLUE.c_str(),
             progressBar.c_str(),

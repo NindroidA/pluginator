@@ -4,6 +4,7 @@
 #include "../include/lang.hpp"
 #include "../include/colors.hpp"
 #include "../include/utils.hpp"
+#include "../include/progress_bar.hpp"
 #include <fstream>
 #include <filesystem>
 #include <algorithm>
@@ -47,6 +48,10 @@ bool PluginManager::loadPluginVersions() {
     return true;
 }
 
+/**
+ * getLoadedPlugins
+ * @brief Just a simple getter function to get the loaded plugins
+ */
 const vector<Plugin>& PluginManager::getLoadedPlugins() const { return plugins; }
 
 /**
@@ -361,9 +366,16 @@ void PluginManager::scanAndUpdateVersions(const string& pluginsPath) {
         return;
     }
     
+    int totalPlugins = plugins.size();
     int updatedCount = 0;
     
-    for (const Plugin& plugin : plugins) {
+    ProgressBar progress(totalPlugins, "Scanning files");
+    
+    for (int i = 0; i < totalPlugins; i++) {
+        const Plugin& plugin = plugins[i];
+        
+        progress.update(i + 1, plugin.name);
+        
         string detectedVersion = detectPluginVersion(plugin, pluginsPath);
         
         if (!detectedVersion.empty() && detectedVersion != "unknown") {
@@ -379,7 +391,7 @@ void PluginManager::scanAndUpdateVersions(const string& pluginsPath) {
         }
     }
     
-    logger.success("Scan complete. Updated " + to_string(updatedCount) + " plugin versions.");
+    progress.finish("Updated " + to_string(updatedCount) + " plugin versions.");
 }
 
 void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
@@ -390,22 +402,27 @@ void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
         return;
     }
     
+    int totalPlugins = plugins.size();
     int updatedCount = 0;
     int apiUpdatedCount = 0;
     
-    for (const Plugin& plugin : plugins) {
+    ProgressBar progress(totalPlugins, "Scanning plugins");
+    
+    for (int i = 0; i < totalPlugins; i++) {
+        const Plugin& plugin = plugins[i];
+        
+        progress.update(i + 1, plugin.name);
+        
         string detectedVersion = detectPluginVersion(plugin, pluginsPath);
         string currentStored = getStoredVersion(plugin.name);
         
         if (!detectedVersion.empty() && detectedVersion != "unknown") {
-            // version found in file name
             if (currentStored != detectedVersion) {
                 setStoredVersion(plugin.name, detectedVersion);
-                logger.log("Updated " + plugin.name + " from filename: " + detectedVersion);
+                logger.debug("Updated " + plugin.name + " from filename: " + detectedVersion);
                 updatedCount++;
             }
         } else {
-            // no version in file name - check API
             if (plugin.type != "manual") {
                 logger.debug("No filename version for " + plugin.name + ", checking API...");
                 
@@ -421,7 +438,7 @@ void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
                     
                     if (currentStored != apiInfo.version) {
                         setStoredVersion(plugin.name, apiInfo.version);
-                        logger.log("Updated " + plugin.name + " from API: " + apiInfo.version);
+                        logger.debug("Updated " + plugin.name + " from API: " + apiInfo.version);
                         apiUpdatedCount++;
                     }
                 }
@@ -429,19 +446,25 @@ void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
         }
     }
     
-    logger.success("Scan complete. Updated " + to_string(updatedCount) + 
-                  " from filenames, " + to_string(apiUpdatedCount) + " from APIs.");
+    progress.finish("Scan complete. Updated " + to_string(updatedCount) + 
+                   " from filenames, " + to_string(apiUpdatedCount) + " from APIs.");
 }
 
 void PluginManager::verifyVersionsWithAPI(const string& pluginsPath) {
     logger.log("Verifying stored versions against installed files...");
     
+    int totalPlugins = plugins.size();
     int verifiedCount = 0;
     int correctedCount = 0;
     int newerAvailableCount = 0;
     
-    for (const Plugin& plugin : plugins) {
-        // get what version is actually installed from the file
+    ProgressBar progress(totalPlugins, "Verifying plugins");
+    
+    for (int i = 0; i < totalPlugins; i++) {
+        const Plugin& plugin = plugins[i];
+        
+        progress.update(i + 1, plugin.name);
+        
         string actualInstalledVersion = detectPluginVersion(plugin, pluginsPath);
         string storedVersion = getStoredVersion(plugin.name);
         
@@ -450,19 +473,17 @@ void PluginManager::verifyVersionsWithAPI(const string& pluginsPath) {
             continue;
         }
         
-        // check if stored version matches what is actually installed
         if (storedVersion == actualInstalledVersion) {
             verifiedCount++;
             logger.debug("Verified " + plugin.name + " version: " + storedVersion);
         } else {
-            // if stored version doesn't match installed version, fix it
             setStoredVersion(plugin.name, actualInstalledVersion);
-            logger.log("Corrected " + plugin.name + ": stored=" + storedVersion + 
-                      " → actual=" + actualInstalledVersion);
+            logger.debug("Corrected " + plugin.name + ": stored=" + storedVersion + 
+                        " → actual=" + actualInstalledVersion);
             correctedCount++;
         }
         
-        // optionally check if newer version is available (but don't auto-update)
+        // check for updates
         if (plugin.type != "manual") {
             PluginUpdateInfo apiInfo = checkPluginUpdate(plugin);
             
@@ -474,15 +495,20 @@ void PluginManager::verifyVersionsWithAPI(const string& pluginsPath) {
             if (!apiInfo.version.empty() && apiInfo.version != "unknown" && 
                 apiInfo.version != "spiget-latest" && apiInfo.version != "latest") {
                 
-                // check if newer version is available
                 if (isNewerVersion(actualInstalledVersion, apiInfo.version)) {
-                    logger.log("Update available for " + plugin.name + ": " + 
+                    logger.debug("Update available for " + plugin.name + ": " + 
                                actualInstalledVersion + " → " + apiInfo.version);
                     newerAvailableCount++;
                 }
             }
         }
     }
+    
+    string summary = "Verified: " + to_string(verifiedCount) + 
+                    ", Corrected: " + to_string(correctedCount) + 
+                    ", Updates available: " + to_string(newerAvailableCount);
+    
+    progress.finish(summary);
     
     logger.success("Verification complete:");
     logger.success("  • " + to_string(verifiedCount) + " versions verified correct");
@@ -1266,9 +1292,7 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
     string testPluginsPath = Config::getInstance().getTestServerPath() + "/plugins";
     int totalPlugins = plugins.size();
     
-    cout << "\nChecking " << totalPlugins << " plugins for updates..." << endl;
-    
-    // structure to store results from single check
+    // struct to store results from single check
     struct PluginStatus {
         string currentVersion;
         string latestVersion;
@@ -1279,22 +1303,13 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
     vector<PluginStatus> results;
     results.reserve(totalPlugins);
     
+    ProgressBar progress(totalPlugins, "Checking plugins");
+    
     // check each plugin once and store results
     for (int i = 0; i < totalPlugins; i++) {
         const Plugin& plugin = plugins[i];
         
-        // show progress bar
-        double progress = (double)(i + 1) / totalPlugins * 100.0;
-        int barWidth = 50;
-        int filledWidth = (int)(barWidth * progress / 100.0);
-        
-        cout << "\r[";
-        for (int j = 0; j < barWidth; ++j) {
-            if (j < filledWidth) cout << "=";
-            else if (j == filledWidth && progress < 100.0) cout << ">";
-            else cout << " ";
-        }
-        cout << "] " << fixed << setprecision(0) << progress << "% " << flush;
+        progress.update(i + 1, plugin.name);
         
         // do the actual checking
         PluginStatus status;
@@ -1308,59 +1323,11 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
         if (exists(testPluginsPath)) {
             for (const auto& entry : directory_iterator(testPluginsPath)) {
                 string filename = entry.path().filename().string();
-                
-                if (!endsWith(filename, ".jar") || endsWith(filename, ".jar.DIS")) continue;
-                
-                // rm .jar extension and version numbers for comparison
-                string cleanFilename = filename;
-                if (endsWith(cleanFilename, ".jar")) {
-                    cleanFilename = cleanFilename.substr(0, cleanFilename.length() - 4);
+                if (filename.find(plugin.name.substr(0, min(5, (int)plugin.name.length()))) != string::npos &&
+                    endsWith(filename, ".jar") && !endsWith(filename, ".jar.DIS")) {
+                    pluginExists = true;
+                    break;
                 }
-                
-                string pluginName = plugin.name;
-                
-                // create multiple search patterns
-                vector<string> searchPatterns;
-                
-                // original name
-                searchPatterns.push_back(pluginName);
-                
-                // remove common suffixes
-                if (pluginName.find("-Reloaded") != string::npos) {
-                    searchPatterns.push_back(pluginName.substr(0, pluginName.find("-Reloaded")));
-                }
-                if (pluginName.find("V3") != string::npos) {
-                    searchPatterns.push_back(pluginName.substr(0, pluginName.find("V3")));
-                }
-                
-                // add hyphenated versions
-                string hyphenated = pluginName;
-                for (size_t i = 0; i < hyphenated.length(); i++) {
-                    if (isupper(hyphenated[i]) && i > 0 && islower(hyphenated[i-1])) {
-                        hyphenated.insert(i, 1, '-');
-                        i++;
-                    }
-                }
-                searchPatterns.push_back(hyphenated);
-                
-                // check each pattern (case-insensitive)
-                for (const string& pattern : searchPatterns) {
-                    string patternLower = pattern;
-                    transform(patternLower.begin(), patternLower.end(), patternLower.begin(), ::tolower);
-                    
-                    string filenameLower = cleanFilename;
-                    transform(filenameLower.begin(), filenameLower.end(), filenameLower.begin(), ::tolower);
-                    
-                    // check if pattern matches the start of filename
-                    if (filenameLower.find(patternLower) == 0 || 
-                        filenameLower.find(patternLower) != string::npos) {
-                        pluginExists = true;
-                        logger.debug("Matched plugin '" + pluginName + "' with file '" + filename + "' using pattern '" + pattern + "'");
-                        break;
-                    }
-                }
-                
-                if (pluginExists) break;
             }
         }
         
@@ -1370,12 +1337,11 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
                 status.statusText = "Installed";
                 
                 if (plugin.type != "manual") {
-                    // use the same method as the original summary for consistency
                     PluginUpdateInfo updateInfo = checkPluginUpdate(plugin);
                     
                     if (updateInfo.error.empty()) {
                         status.latestVersion = updateInfo.version;
-                        if (updateInfo.hasUpdate) {  // use the same hasUpdate logic
+                        if (updateInfo.hasUpdate) {
                             status.statusColor = Colors::YELLOW;
                             status.statusText = "Update Avail";
                         }
@@ -1412,6 +1378,8 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
         
         results.push_back(status);
     }
+    
+    progress.finish();
     
     cout << " Complete!" << endl << endl;
     

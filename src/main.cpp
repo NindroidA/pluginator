@@ -27,7 +27,6 @@ void showHelp() {
     cout << "\nRun without arguments for interactive mode." << endl;
 }
 
-
 int main(int argc, char* argv[]) {
     // check for debug flag
     bool debugMode = false;
