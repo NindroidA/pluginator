@@ -1,3 +1,6 @@
+# Dev Update v1.1.9
+- Hotfix for build error (cause i forgot two imports in logger lmao).
+
 # Dev Update v1.1.8
 - Cleaned up more small comments/unused tings.
 - Will need to comment out more functions but that'll be for later

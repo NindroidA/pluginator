@@ -7,6 +7,8 @@
 #include <chrono>
 #include <iomanip>
 #include <sstream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 using namespace filesystem;
