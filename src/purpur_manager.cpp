@@ -18,7 +18,7 @@ PurpurInfo PurpurManager::checkPurpurUpdate() {
     
     logger.log(LANG("purpur.checking"));
     
-    // get latest Purpur version
+    // get latest purpur version
     HttpResponse versionResponse = httpClient.get("https://api.purpurmc.org/v2/purpur");
     
     if (!versionResponse.success) {
@@ -64,7 +64,7 @@ PurpurInfo PurpurManager::checkPurpurUpdate() {
     
     // construct download URL
     info.downloadUrl = "https://api.purpurmc.org/v2/purpur/" + info.latestVersion + "/latest/download";
-    info.hasUpdate = true; // caller will determine if update is needed
+    info.hasUpdate = true; // will determine if update is needed
     
     return info;
 }
@@ -82,10 +82,10 @@ bool PurpurManager::downloadPurpur(const string& version, const string& outputPa
     // The fancy progress bar will be shown by HttpClient
     bool success = httpClient.downloadFile(url, outputPath, nullptr);
     
-    cout << endl; // Extra spacing after progress bar
+    cout << endl; // extra spacing after progress bar
     
     if (success) {
-        // Show file size after successful download
+        // show file size after successful download
         ifstream file(outputPath, ios::binary | ios::ate);
         if (file.is_open()) {
             size_t fileSize = file.tellg();

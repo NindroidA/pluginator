@@ -1,3 +1,8 @@
+# Dev Update v1.1.8
+- Cleaned up more small comments/unused tings.
+- Will need to comment out more functions but that'll be for later
+- First stable(ish) deploy (bugs will most likely be present).
+
 # Dev Update v1.1.7
 - Cleaned up file structure and organized different files instead of having them all in root dir.
 - Added progress bar class and logic.
