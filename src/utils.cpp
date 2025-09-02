@@ -1,6 +1,7 @@
 #include "../include/utils.hpp"
 #include <sstream>
 #include <iomanip>
+#include <filesystem>
 
 namespace Utils {
     
@@ -64,5 +65,28 @@ namespace Utils {
         bar << "]";
         
         return bar.str();
+    }
+
+    string getInstallDirectory() {
+        try {
+            auto binaryPath = std::filesystem::canonical("/proc/self/exe");
+            auto installDir = binaryPath.parent_path().parent_path();
+            return installDir.string();
+        } catch (const std::exception& e) {
+            // fallback
+            return "/opt/pluginator";
+        }
+    }
+    
+    string getConfigPath(const string& filename) {
+        return getInstallDirectory() + "/config/" + filename;
+    }
+    
+    string getDataPath(const string& filename) {
+        return getInstallDirectory() + "/data/" + filename;
+    }
+    
+    string getLangPath(const string& filename) {
+        return getInstallDirectory() + "/lang/" + filename;
     }
 }

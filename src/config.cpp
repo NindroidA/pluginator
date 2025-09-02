@@ -1,4 +1,5 @@
 #include "../include/config.hpp"
+#include "../include/utils.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -23,12 +24,8 @@ Config::Config() {
     // load from env variables
     //loadFromEnv();
 
-    // get the config file location based on where the program build is running
-    auto binaryPath = std::filesystem::canonical("/proc/self/exe");
-    auto installDir = binaryPath.parent_path().parent_path();
-    string configFile = installDir / "config" / "pluginator.config";
-
-    // try to load config
+    // load the config
+    string configFile = Utils::getConfigPath("pluginator.config");
     loadFromFile(configFile);
 }
 

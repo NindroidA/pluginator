@@ -72,7 +72,7 @@ public:
     void scanAndUpdateVersionsWithAPI(const string& pluginsPath);
     void verifyVersionsWithAPI(const string& pluginsPath);
     string detectPluginVersion(const Plugin& plugin, const string& pluginsPath);
-    void generateConfigFromPluginList(const string& pluginListFile);
+    void generateConfigFromPluginList(const string& pluginListFile); // DEPRECATED
 
     // core plugin managements
     void initPluginVersions();

@@ -60,7 +60,7 @@ string Pluginator::getCurrentTimestamp() {
  */
 void Pluginator::initPlugins() {
     // try to load from external config
-    if (pluginManager.initFromConfig("data/plugins.json")) {
+    if (pluginManager.initFromConfig(Utils::getDataPath("plugins.json"))) {
         logger.success(LANG("plugin.config_loaded_external"));
 
         plugins = pluginManager.getLoadedPlugins();
@@ -70,12 +70,14 @@ void Pluginator::initPlugins() {
     }
 
     // if no config file, generate one from plugin list
-    if (exists("data/plugin-list.txt")) {
+    /*
+    if (exists(Utils::getDataPath("plugin-list.txt"))) {
         logger.debug(LANG("plugin.generating_from_list"));
-        pluginManager.generateConfigFromPluginList("data/plugin-list.txt");
+        pluginManager.generateConfigFromPluginList(Utils::getDataPath("plugin-list.txt"));
         plugins = pluginManager.getLoadedPlugins();
         return;
     }
+    */
 
     // fallback (scan existing plugins dir)
     string testPluginsPath = testServerPath + "/plugins";
@@ -419,9 +421,10 @@ void Pluginator::runInteractive() {
                 string pluginsPath = Config::getInstance().getTestServerPath() + "/plugins";
                 pluginManager.scanAndConfigurePlugins(pluginsPath);
             } else if (subChoice == "2") {
+                // @todo DEPRECATE
                 pluginManager.generateConfigFromPluginList("data/plugin-list.txt");
             } else if (subChoice == "3") {
-                pluginManager.initFromConfig("data/plugins.json");
+                pluginManager.initFromConfig(Utils::getDataPath("plugins.json"));
             }
         } else if (choice == "0") {
             logger.log(LANG("app.session_ended"));

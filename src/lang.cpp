@@ -1,4 +1,5 @@
 #include "../include/lang.hpp"
+#include "../include/utils.hpp"
 #include <iostream>
 #include <fstream>
 #include <regex>
@@ -8,11 +9,7 @@ Lang* Lang::instance = nullptr;
 
 Lang::Lang() : currentLanguage("en") {
     // get the lang file location based on where the program build is running
-    auto binaryPath = std::filesystem::canonical("/proc/self/exe");
-    auto installDir = binaryPath.parent_path().parent_path();
-    string langFile = installDir / "lang" / "en.json";
-    
-    loadFromJson(langFile);
+    loadFromJson(Utils::getLangPath("en.json"));
 }
 
 /**

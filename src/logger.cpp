@@ -208,7 +208,7 @@ void Logger::success(const string& msg) {
 
 /* logging a warning */
 void Logger::warn(const string& msg) {
-    cout << Colors::YELLOW << "[WARNING] ⚠️" << msg << Colors::NC << endl;
+    cout << Colors::YELLOW << "[WARNING] ⚠️ " << msg << Colors::NC << endl;
     logToFile("WARNING", msg);
 }
 

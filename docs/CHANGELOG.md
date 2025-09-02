@@ -1,3 +1,7 @@
+# Dev Update v1.1.11
+- Hotfix for lang problems and path problems.
+- Idk what I was smoking when I started this project, but the generateConfigFromPluginList function in plugin_manager has gotta go (because it literally serves no purpose).
+
 # Dev Update v1.1.10
 - Hotfix for config error (cause i forgor to change the path).
 - Removed unnecessary config files.

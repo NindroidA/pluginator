@@ -18,7 +18,7 @@ using namespace std;
 
 PluginManager::PluginManager(Logger& log) : logger(log) {
     pluginVersionsFile = Config::getInstance().getPluginVersionsFile();
-    httpClient.setUserAgent("Pluginator (Minecraft Plugin Manager)");
+    httpClient.setUserAgent("Pluginator");
     httpClient.setTimeout(30);
 }
 
@@ -612,6 +612,7 @@ string PluginManager::detectPluginVersion(const Plugin& plugin, const string& pl
 }
 
 /**
+ * @deprecated
  * generateConfigFromPluginList
  * @brief function to generate a plugin config from the scanned plugins
  * @param pluginListFile string reference to the plugin list file

@@ -16,6 +16,11 @@ namespace Utils {
     
     // progress bar shite
     string createProgressBar(double progress, int width = 40, char fillChar = '=', char progressChar = '>', char emptyChar = ' ');
+
+    string getInstallDirectory();
+    string getConfigPath(const string& filename);
+    string getDataPath(const string& filename);
+    string getLangPath(const string& filename);
 }
 
 // ========== combatibility helpers ========== //

@@ -96,6 +96,7 @@
   "plugin.added_from_list": "Added from list: {0} (type: {1})",
   "plugin.list_processed": "Processed {0} plugins from list file: {1}",
   "plugin.no_download_info": "No download information available for {0}",
+  "plugin.save_config_prompt": "Save detected plugins to configuration? (y/n): ",
   
   "purpur.checking": "Checking for Purpur updates ...",
   "purpur.latest_version": "Latest version: {0}",
