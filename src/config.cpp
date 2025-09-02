@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <filesystem>
 
 Config* Config::instance = nullptr;
 
@@ -22,10 +23,10 @@ Config::Config() {
     // load from env variables
     //loadFromEnv();
 
-    // get the config file location based on where the program is running
-    string binaryPath = std::filesystem::canonical("/proc/self/exe").parent_path();
-    string installDir = binaryPath.parent_path();
-    string configFile = installDir + "/config/pluginator.config";
+    // get the config file location based on where the program build is running
+    auto binaryPath = std::filesystem::canonical("/proc/self/exe");
+    auto installDir = binaryPath.parent_path().parent_path();
+    string configFile = installDir / "config" / "pluginator.config";
 
     // try to load config
     loadFromFile(configFile);
