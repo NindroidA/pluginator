@@ -345,7 +345,7 @@ void PluginManager::scanAndConfigurePlugins(const string& pluginsPath) {
         plugin.filenamePattern = pluginName + "*.jar";
         
         detectedPlugins.push_back(plugin);
-        logger.log(LANGF("plugin.detected", pluginName, plugin.type));
+        logger.debug(LANGF("plugin.detected", pluginName, plugin.type));
     }
     
     logger.success(LANGF("plugin.scan_completed", to_string(detectedPlugins.size())));

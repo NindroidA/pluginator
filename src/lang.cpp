@@ -6,7 +6,12 @@
 Lang* Lang::instance = nullptr;
 
 Lang::Lang() : currentLanguage("en") {
-    loadFromJson("lang/en.json");
+    // get the lang file location based on where the program build is running
+    auto binaryPath = std::filesystem::canonical("/proc/self/exe");
+    auto installDir = binaryPath.parent_path().parent_path();
+    string langFile = installDir / "lang" / "en.json";
+    
+    loadFromJson(langFile);
 }
 
 /**
