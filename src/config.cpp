@@ -8,6 +8,7 @@ Config* Config::instance = nullptr;
 
 Config::Config() {
     // set defaults
+    /*
     settings["PROD_SERVER_PATH"] = "./SERVER/prod";
     settings["TEST_SERVER_PATH"] = "./SERVER/test";
     settings["BACKUP_DIR"] = "./data/backups";
@@ -16,9 +17,10 @@ Config::Config() {
     settings["MAX_BACKUPS"] = "2";
     settings["MAX_LOG_DAYS"] = "30";
     settings["MINECRAFT_VERSION"] = "1.21.8";
+    */
 
     // load from env variables
-    loadFromEnv();
+    //loadFromEnv();
 
     // try to load config
     loadFromFile("./config/pluginator.config");
