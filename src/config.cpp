@@ -22,8 +22,13 @@ Config::Config() {
     // load from env variables
     //loadFromEnv();
 
+    // get the config file location based on where the program is running
+    string binaryPath = std::filesystem::canonical("/proc/self/exe").parent_path();
+    string installDir = binaryPath.parent_path();
+    string configFile = installDir + "/config/pluginator.config";
+
     // try to load config
-    loadFromFile("./config/pluginator.config");
+    loadFromFile(configFile);
 }
 
 /**
