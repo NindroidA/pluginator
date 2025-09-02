@@ -496,7 +496,7 @@ void Pluginator::sync() {
         if (entry.path().extension() == ".jar") {
             try {
                 remove(entry.path());
-                logger.log(LANGF("sync.removed", entry.path().filename().string()));
+                logger.debug(LANGF("sync.removed", entry.path().filename().string()));
                 removedCount++;
             } catch (const exception& e) {
                 logger.warn(LANGF("error.failed_to_remove", entry.path().filename().string()));
@@ -514,7 +514,7 @@ void Pluginator::sync() {
             try {
                 path destination = path(testPluginsPath) / entry.path().filename();
                 copy_file(entry.path(), destination);
-                logger.log("Copied: " + entry.path().filename().string());
+                logger.debug("Copied: " + entry.path().filename().string());
                 copiedCount++;
             } catch (const exception& e) {
                 logger.warn("Failed to copy: " + entry.path().filename().string());
