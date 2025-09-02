@@ -1,0 +1,25 @@
+# debug
+PLUGINATOR_DEBUG=0
+
+# server paths
+PROD_SERVER_PATH=./SERVER/prod
+TEST_SERVER_PATH=./SERVER/test
+
+# storage directories
+BACKUP_DIR=./data/backups
+LOGS_DIR=./data/logs
+
+# files
+PLUGIN_VERSIONS_FILE=./data/plugin_versions.json
+
+# settings
+MAX_BACKUPS=2
+MAX_LOG_DAYS=30
+MINECRAFT_VERSION=1.21.8
+
+# lang
+DEFAULT_LANGUAGE=en
+
+# custom
+API_TIMEOUT=30
+DOWNLOAD_THREADS=2

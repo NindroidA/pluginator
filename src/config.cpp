@@ -21,7 +21,7 @@ Config::Config() {
     loadFromEnv();
 
     // try to load config
-    loadFromFile("pluginator.config");
+    loadFromFile("./config/pluginator.config");
 }
 
 /**
@@ -37,6 +37,7 @@ Config& Config::getInstance() {
 }
 
 /**
+ * @deprecated
  * getEnvVar
  * @brief function to get the value on an environment variable
  * @param name string reference to the name of the environment variable
@@ -49,6 +50,7 @@ string Config::getEnvVar(const string& name, const string& defaultValue) {
 }
 
 /**
+ * @deprecated
  * loadFromEnv
  * @brief function to load environment variables from the env file
  */
@@ -136,7 +138,7 @@ void Config::loadConfig(const string& filename) {
     loadFromFile(filename);
     
     // also reload environment variables to ensure they take precedence
-    loadFromEnv();
+    //loadFromEnv();
 }
 
 /**

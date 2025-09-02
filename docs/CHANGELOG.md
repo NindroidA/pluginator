@@ -1,3 +1,7 @@
+# Dev Update v1.1.10
+- Hotfix for config error (cause i forgor to change the path).
+- Removed unnecessary config files.
+
 # Dev Update v1.1.9
 - Hotfix for build error (cause i forgot two imports in logger lmao).
 
