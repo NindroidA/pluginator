@@ -19,7 +19,7 @@
 [] main
 
 # Clean more lang shite
-[] gotta go through and clean up lang strings that i was too lazy to add in the moment and just hard coded lol (and check to make sure i didn't forget any)
+[x] gotta go through and clean up lang strings that i was too lazy to add in the moment and just hard coded lol (and check to make sure i didn't forget any)
 
 # double check commands logic
 [] sync
