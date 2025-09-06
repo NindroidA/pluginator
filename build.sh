@@ -18,7 +18,7 @@ chmod 755 build/pluginator
 # make sure perms for data directories are guud
 echo "Confirming permissions for data files and directories ..."
 chmod 664 data/*.json
-chmost 664 config/pluginator.config
+chmod 664 config/pluginator.config
 chmod -R 775 config/ data/
 
 echo "Done!"
