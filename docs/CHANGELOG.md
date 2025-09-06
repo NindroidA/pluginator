@@ -7,6 +7,7 @@
 - Added progress bar to the tar command when backing up files.
 - Fixed plugins not getting re-disabled after migration command.
 - Added INFO logger for sections with custom emojis n shit.
+- Added quick build script.
 
 # Dev Update v1.2.0
 - Fixed plugin-status command logic (had old unuseful code that didn't do the checks correctly).
