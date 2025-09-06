@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <sstream>
 #include <thread>
+#include <atomic>
 
 using namespace std;
 using namespace filesystem;

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <regex>
 #include <filesystem>
+#include <vector>
 
 Lang* Lang::instance = nullptr;
 
