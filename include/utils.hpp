@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdint>
 
+using namespace filesystem;
 using namespace std;
 
 namespace Utils {
@@ -24,9 +25,9 @@ namespace Utils {
 }
 
 // ========== combatibility helpers ========== //
-inline time_t fileTimeToTimeT(const filesystem::file_time_type& ftime) {
+inline time_t fileTimeToTimeT(const file_time_type& ftime) {
     auto sctp = chrono::time_point_cast<chrono::system_clock::duration>(
-        ftime - filesystem::file_time_type::clock::now() + chrono::system_clock::now()
+        ftime - file_time_type::clock::now() + chrono::system_clock::now()
     );
     return chrono::system_clock::to_time_t(sctp);
 }

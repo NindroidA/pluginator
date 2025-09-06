@@ -19,7 +19,8 @@ chmod 755 build/pluginator
 echo "Confirming permissions for data files and directories ..."
 chmod 664 data/*.json
 chmod 664 config/pluginator.config
-chmod -R 775 config/ data/
+chmod 664 lang/*.json
+chmod -R 775 config/ data/ lang/
 
 # bada bing bada done
 echo "Done!"

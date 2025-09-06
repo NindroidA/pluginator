@@ -61,5 +61,5 @@ public:
     // utils
     void disablePluginsForTest();
     string getCurrentTimestamp();
-    const vector<Plugin>& getLoadedPlugins();
+    //const vector<Plugin>& getLoadedPlugins();
 };
