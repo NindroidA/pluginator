@@ -21,4 +21,5 @@ chmod 664 data/*.json
 chmod 664 config/pluginator.config
 chmod -R 775 config/ data/
 
+# bada bing bada done
 echo "Done!"
