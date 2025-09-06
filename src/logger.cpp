@@ -1,5 +1,6 @@
 #include "../include/logger.hpp"
 #include "../include/colors.hpp"
+#include "../include/lang.hpp"
 #include "../include/utils.hpp"
 #include <iostream>
 #include <fstream>
@@ -20,7 +21,7 @@ Logger::Logger(const string& logDirectory, int maxDays) : logsDir(logDirectory),
 
 /**
  * getCurrentLogFile
- * @brief function to get the current log file path
+ * @brief get the current log file path
  * @return string of the log file path
  */
 string Logger::getCurrentLogFile() {
@@ -33,7 +34,7 @@ string Logger::getCurrentLogFile() {
 
 /**
  * initLogging
- * @brief function to initialize log directory and file
+ * @brief initialize log directory and file
  */
 void Logger::initLogging() {
     create_directories(logsDir);
@@ -72,7 +73,7 @@ void Logger::logToFile(const string& level, const string& msg) {
 
 /**
  * getCurrentTimestamp
- * @brief function to get the current timestamp
+ * @brief get the current timestamp
  * @return string of the current timestamp
  */
 string Logger::getCurrentTimestamp() {
@@ -85,7 +86,7 @@ string Logger::getCurrentTimestamp() {
 
 /**
  * cleanupOldLogs
- * @brief function to clean up old log files (keeps last 30 days)
+ * @brief clean up old log files
  */
 void Logger::cleanupOldLogs() {
     if (!exists(logsDir)) return;
@@ -109,24 +110,23 @@ void Logger::cleanupOldLogs() {
     }
     
     if (deletedCount > 0) {
-        log("Cleaned up " + to_string(deletedCount) + " old log files (older than " + 
-            to_string(maxLogDays) + " days)");
+        log(LANGF("logger.cleanup", to_string(deletedCount), to_string(maxLogDays)));
     }
 }
 
 /**
  * viewRecentLogs
- * @brief function to view most recent logs
+ * @brief view most recent logs
  */
 void Logger::viewRecentLogs() {
-    cout << "\n" << Colors::BLUE << "📋 Recent Log Files:" << Colors::NC << endl;
+    cout << "\n" << Colors::BLUE << LANG("logger.recent_title") << Colors::NC << endl;
     
     if (!exists(logsDir)) {
-        cout << "Logs directory not found: " << logsDir << endl;
+        cout << LANG("error.dir_not_found") << logsDir << endl;
         return;
     }
     
-    cout << "Available log files:" << endl;
+    cout << LANG("logger.files_available") << endl;
     
     // explicit type declaration (cause it was being a lil bish)
     std::vector<std::pair<filesystem::path, time_t>> logFiles;
@@ -158,7 +158,7 @@ void Logger::viewRecentLogs() {
              << " - " << timeStr << endl;
     }
     
-    cout << "\nLatest log entries:" << endl;
+    cout << LANG("logger.latest_entries") << endl;
     string currentLog = getCurrentLogFile();
     if (exists(currentLog)) {
         ifstream file(currentLog);
@@ -176,9 +176,49 @@ void Logger::viewRecentLogs() {
             }
         }
     } else {
-        cout << "No entries in today's log yet." << endl;
+        cout << LANG("logger.no_entries") << endl;
     }
     cout << endl;
+}
+
+/**
+ * checkLogFileSize  
+ * @brief check if current log file is getting too large
+ */
+void Logger::checkLogFileSize() {
+    string currentLog = getCurrentLogFile();
+    if (exists(currentLog)) {
+        auto fileSize = file_size(currentLog);
+        debug(LANGF("logger.file_size", Utils::formatBytes(fileSize)));
+        if (fileSize > maxLogFileSize) {
+            rotateLogFile();
+        }
+    }
+}
+
+/**
+ * rotateLogFile
+ * @brief rotate current log file if it gets too large
+ */
+void Logger::rotateLogFile() {
+    string currentLog = getCurrentLogFile();
+    string rotatedLog = currentLog + ".old";
+    
+    try {
+        if (exists(rotatedLog)) {
+            remove(rotatedLog);
+        }
+        rename(currentLog, rotatedLog);
+        
+        // log to new file
+        log(LANG("logger.file_rotated"));
+        
+    } catch (const exception& e) {
+        // fallback - just truncate the file
+        ofstream truncate(currentLog, ios::trunc);
+        truncate.close();
+        warn(LANG("logger.file_truncated"));
+    }
 }
 
 void Logger::enableDebug(bool enabled) { debugMode = enabled; }
@@ -200,6 +240,12 @@ void Logger::log(const string& msg) {
     logToFile("LOG", msg);
 }
 
+/* info log */
+void Logger::info(const string& msg) {
+    cout << Colors::BRIGHT_WHITE << "[INFO] " << msg << Colors::NC << endl;
+    logToFile("INFO", msg);
+}
+
 /* logging a success */
 void Logger::success(const string& msg) {
     cout << Colors::GREEN << "[SUCCESS] ✅" << msg << Colors::NC << endl;
@@ -217,8 +263,6 @@ void Logger::err(const string& msg) {
     cout << Colors::RED << "[ERROR] ❌" << msg << Colors::NC << endl;
     logToFile("ERROR", msg);
 }
-
-// @todo make a debug level
 
 /* prompt for the user to input */
 string Logger::prompt(const string& msg) {

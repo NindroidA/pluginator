@@ -2,6 +2,7 @@
 #include "plugin.hpp"
 #include "http_client.hpp"
 #include "logger.hpp"
+#include "progress_bar.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -31,13 +32,23 @@ class PluginManager {
     bool savePluginVersions();
     string extractVersionFromFilename(const string& filename);
 
+    // caching
+    map<string, string> typeDetectionCache;
+    string cacheFile = "plugin_type_cache.json";
+    
+    void loadTypeCache();
+    void saveTypeCache();
+    string tryModrinthDetection(const string& pluginName);
+    string tryGitHubDetection(const string& pluginName); 
+    string trySpigotDetection(const string& pluginName);
+
     // external config
     bool loadPluginConfigs(const string& configFile = "plugins.json");
     Plugin parsePluginFromJson(const map<string, string>& pluginData);
     bool savePluginConfigs(const string& configFile = "plugins.json");
 
     // auto detection
-    vector<Plugin> detectInstalledPlugins(const string& pluginsPath);
+    //vector<Plugin> detectInstalledPlugins(const string& pluginsPath);
     string guessPluginType(const string& pluginName);
 
     PluginUpdateInfo checkPluginUpdateSilent(const Plugin& plugin);
@@ -72,7 +83,9 @@ public:
     void scanAndUpdateVersionsWithAPI(const string& pluginsPath);
     void verifyVersionsWithAPI(const string& pluginsPath);
     string detectPluginVersion(const Plugin& plugin, const string& pluginsPath);
-    void generateConfigFromPluginList(const string& pluginListFile); // DEPRECATED
+    string findMatchingPluginFile(const string& pluginName, const string& pluginsPath);
+    vector<string> generatePluginNameVariants(const string& pluginName);
+    bool isPluginMatch(const vector<string>& variants, const string& filename);
 
     // core plugin managements
     void initPluginVersions();

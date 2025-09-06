@@ -11,7 +11,7 @@ class Lang {
 
     Lang();
     void loadFromJson(const string& filename);
-    void loadDefaultStrings();
+    void parseJsonObject(const string& jsonContent, const string& prefix);
 
 public:
     static Lang& getInstance();
@@ -21,6 +21,12 @@ public:
     string format(const string& key, const string& arg1) const;
     string format(const string& key, const string& arg1, const string& arg2) const;
     string format(const string& key, const string& arg1, const string& arg2, const string& arg3) const;
+    string formatSafe(const string& key, const vector<string>& args) const;
+
+    // validation
+    bool hasKey(const string& key) const;
+    vector<string> getMissingKeys(const vector<string>& requiredKeys) const;
+    int getLoadedStringCount() const;
 
     // lang management
     void setLanguage(const string& lang);

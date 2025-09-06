@@ -9,6 +9,7 @@
 #include <iostream>
 #include <filesystem>
 #include <sstream>
+#include <thread>
 
 using namespace std;
 using namespace filesystem;
@@ -24,21 +25,23 @@ Pluginator::Pluginator() : logger(Config::getInstance().getLogsDir(), Config::ge
     Config& config = Config::getInstance();
     prodServerPath = config.getProdServerPath();
     testServerPath = config.getTestServerPath();
-    backupDir = config.getBackupDir();
+    backupDir = Utils::getDataPath("backups");
     pluginVersionsFile = config.getPluginVersionsFile();
     maxBackups = config.getMaxBackups();
 
     // create backup dir if it doesn't exist
-    create_directories(backupDir);
+    if (!backupDir.empty() && !std::filesystem::exists(backupDir)) {
+        create_directories(backupDir);
+    }
 
     // load and initialize plugins
     initPlugins();
     pluginManager.initPluginVersions();
 
     logger.debug(LANG("app.session_started"));
-    logger.debug("Production: " + prodServerPath);
-    logger.debug("Test: " + testServerPath);
-    logger.debug("Backups: " + backupDir);
+    logger.debug(LANGF("app.prod", prodServerPath));
+    logger.debug(LANGF("app.test", testServerPath));
+    logger.debug(LANGF("app.backups", backupDir));
 }
 
 /**
@@ -65,19 +68,9 @@ void Pluginator::initPlugins() {
 
         plugins = pluginManager.getLoadedPlugins();
 
-        logger.debug("Populated " + to_string(plugins.size()) + " plugins in main class");
+        logger.debug(LANGF("plugin.init", to_string(plugins.size())));
         return;
     }
-
-    // if no config file, generate one from plugin list
-    /*
-    if (exists(Utils::getDataPath("plugin-list.txt"))) {
-        logger.debug(LANG("plugin.generating_from_list"));
-        pluginManager.generateConfigFromPluginList(Utils::getDataPath("plugin-list.txt"));
-        plugins = pluginManager.getLoadedPlugins();
-        return;
-    }
-    */
 
     // fallback (scan existing plugins dir)
     string testPluginsPath = testServerPath + "/plugins";
@@ -100,10 +93,16 @@ void Pluginator::initPlugins() {
  * @param backupName string reference to the name of the backup
  */
 void Pluginator::backup(const string& serverPath, const string& backupName) {
-    logger.log("💾 Creating backup: " + backupName);
+    logger.log(LANGF("backup.backup_file", backupName));
 
     // create backup dir if it doesn't exist
-    create_directories(backupDir);
+    try {
+        create_directories(backupDir);
+        logger.debug(LANGF("backup.dir_create", backupDir));
+    } catch (const exception& e) {
+        logger.err(LANGF("backup.dir_create_failed", string(e.what())));
+        return;
+    }
 
     // create timestamp and backup file name
     string timestamp = getCurrentTimestamp();
@@ -111,8 +110,27 @@ void Pluginator::backup(const string& serverPath, const string& backupName) {
 
     // check if src path exists
     if (!exists(serverPath)) {
-        logger.err("Source path does not exist: " + serverPath);
+        logger.err(LANGF("backup.source_path_dne", serverPath));
         return;
+    }
+
+    // debug path information
+    logger.debug(LANGF("backup.source_path", serverPath));
+    logger.debug(LANGF("backup.parent_path", path(serverPath).parent_path().string()));
+    logger.debug(LANGF("backup.filename", path(serverPath).filename().string()));
+    logger.debug(LANGF("backup.file", backupFile));
+
+    // get source directory size for progress calculation
+    uintmax_t totalSize = 0;
+    try {
+        for (auto& entry : recursive_directory_iterator(serverPath)) {
+            if (entry.is_regular_file()) {
+                totalSize += entry.file_size();
+            }
+        }
+    } catch (const exception& e) {
+        logger.warn(LANGF("backup.calc_failed", string(e.what())));
+        totalSize = 100 * 1024 * 1024; // fallback estimate
     }
 
     // create tar command
@@ -120,17 +138,72 @@ void Pluginator::backup(const string& serverPath, const string& backupName) {
                     path(serverPath).parent_path().string() + "\" \"" +
                     path(serverPath).filename().string() + "\"";
 
-    logger.log("Running: " + command);
-    int result = system(command.c_str());
+    // start tar in background and monitor progress
+    logger.log(LANGF("backup.running_command", command));
 
+    atomic<bool> tarFinished{false};
+    thread tarThread([command, &tarFinished]() {
+        system(command.c_str());
+        tarFinished = true;
+    });
+    
+    // progress monitoring
+    ProgressBar progressBar(100, "Creating Backup", 40);
+    
+    // timeout variables
+    auto timeoutStart = chrono::steady_clock::now();
+    auto timeout = chrono::minutes(5);
+
+    while (!tarFinished) {
+        if (exists(backupFile)) {
+            uintmax_t currentSize = file_size(backupFile);
+            
+            // estimate compression - assume 50% compression as reasonable estimate
+            uintmax_t estimatedFinalSize = totalSize / 2;
+            int percentage = min(95, (int)((currentSize * 100) / estimatedFinalSize));
+            
+            progressBar.update(percentage, Utils::formatBytes(currentSize));
+        }
+        
+        this_thread::sleep_for(chrono::milliseconds(500));
+        
+        // check timeout
+        if (chrono::steady_clock::now() - timeoutStart > timeout) {
+            logger.warn(LANG("backup.taking_longer"));
+            break;
+        }
+    }
+
+    tarThread.join();
+    progressBar.finish("Backup complete!");
+    
+    // check if the file exists
+    int result = 0;
+    if (!exists(backupFile)) {
+        result = 1; // file doesn't exist = fail
+    } else {
+        uintmax_t finalSize = file_size(backupFile);
+        if (finalSize < 1024) { // sus
+            result = 1;
+        }
+    }
+
+    // check perms on backup directory  
+    auto perms = status(backupDir).permissions();
+    logger.debug(LANGF("backup.dir_permissions", to_string((int)perms)));
+
+    // handle different exit codes
     if (result == 0) {
-        logger.success("✅ Backup created: " + backupFile);
-
-        // clean up old backups
+        logger.success(LANGF("backup.created", backupFile));
         cleanupOldBackups(backupName);
     } else {
-        logger.err("Failed to create backup!");
-        return;
+        logger.err(LANGF("backup.failed_exit_code", to_string(result)));
+        logger.err(LANG("backup.permissions_issue"));
+        // try to remove incomplete backup file
+        if (exists(backupFile)) {
+            remove(backupFile);
+            logger.debug(LANG("backup.timeout_cleanup"));
+        }
     }
 }
 
@@ -148,7 +221,7 @@ void Pluginator::backupTest() {
  * @param backupName string reference to the file name of the backup
  */
 void Pluginator::cleanupOldBackups(const string& backupName) {
-    logger.log("Cleaning up old backups (keeping " + to_string(maxBackups) + " newest) ...");
+    logger.log(LANGF("backup.cleanup", to_string(maxBackups)));
 
     if (!exists(backupDir)) { return; }
 
@@ -172,15 +245,15 @@ void Pluginator::cleanupOldBackups(const string& backupName) {
     for (int i = maxBackups; i < backupFiles.size(); i++) {
         try {
             remove(backupFiles[i].first);
-            logger.log("Removed old backup: " + backupFiles[i].first.filename().string());
+            logger.log(LANGF("backup.removed", backupFiles[i].first.filename().string()));
             removedCount++;
         } catch (const exception& e) {
-            logger.warn("Failed to remove backup: " + backupFiles[i].first.string());
+            logger.warn(LANGF("backup.removed_failed", backupFiles[i].first.string()));
         }
     }
 
     if (removedCount > 0) {
-        logger.log("Cleaned up " + to_string(removedCount) + " old backup files");
+        logger.log(LANGF("backup.cleanup_completed", to_string(removedCount)));
     }
 }
 
@@ -189,10 +262,10 @@ void Pluginator::cleanupOldBackups(const string& backupName) {
  * @brief function to view the recently made backups
  */
 void Pluginator::viewRecentBackups() {
-    cout << "\n" << Colors::BLUE << "📋 Recent Backups:" << Colors::NC << endl;
+    cout << "\n" << Colors::BLUE << LANG("backup.recents") << Colors::NC << endl;
     
     if (!exists(backupDir)) {
-        cout << "Backup directory not found: " << backupDir << endl;
+        logger.log(LANGF("backup.dir_not_found", backupDir));
         return;
     }
     
@@ -208,7 +281,7 @@ void Pluginator::viewRecentBackups() {
     }
     
     if (backupFiles.empty()) {
-        cout << "No backups found." << endl;
+        logger.log(LANG("backup.no_backups"));
         return;
     }
     
@@ -243,6 +316,10 @@ void Pluginator::viewRecentBackups() {
                timeStr);
     }
     cout << endl;
+}
+
+void Pluginator::viewRecentLogs() {
+    logger.viewRecentLogs();
 }
 
 void Pluginator::checkPluginUpdates() {
@@ -395,7 +472,7 @@ void Pluginator::runInteractive() {
             migrateToProduction();
         } else if (choice == "9") {
             system("clear");
-            logger.viewRecentLogs();
+            viewRecentLogs();
         } else if (choice == "10") {
             system("clear");
             viewRecentBackups();
@@ -407,23 +484,19 @@ void Pluginator::runInteractive() {
             showConfiguration();
         } else if (choice == "13") {
             system("clear");
-            cout << "Plugin Configuration Management:" << endl;
-            cout << "1. Scan and configure from existing plugins" << endl;
-            cout << "2. Generate config from plugin-list.txt" << endl;  
-            cout << "3. Reload plugin configuration" << endl;
-            cout << "4. Back to main menu" << endl;
+            cout << LANG("menu.interactive.config_title") << endl;
+            cout << LANG("menu.interactive.config_1") << endl;
+            cout << LANG("menu.interactive.config_2") << endl;
+            cout << LANG("menu.interactive.config_3") << endl;
 
             string subChoice;
-            cout << "Choose option: ";
+            cout << LANG("menu.interactive.choose");
             getline(cin, subChoice);
 
             if (subChoice == "1") {
                 string pluginsPath = Config::getInstance().getTestServerPath() + "/plugins";
                 pluginManager.scanAndConfigurePlugins(pluginsPath);
             } else if (subChoice == "2") {
-                // @todo DEPRECATE
-                pluginManager.generateConfigFromPluginList("data/plugin-list.txt");
-            } else if (subChoice == "3") {
                 pluginManager.initFromConfig(Utils::getDataPath("plugins.json"));
             }
         } else if (choice == "0") {
@@ -441,27 +514,17 @@ void Pluginator::runInteractive() {
 
 void Pluginator::showConfiguration() {
     Config::getInstance().printConfig();
-    cout << "\n" << Colors::BLUE << "Environment Variables:" << Colors::NC << endl;
-    cout << "Set any of these to override config file values:" << endl;
-    cout << "  PLUGINATOR_PROD_PATH" << endl;
-    cout << "  PLUGINATOR_TEST_PATH" << endl;
-    cout << "  PLUGINATOR_BACKUP_DIR" << endl;
-    cout << "  PLUGINATOR_LOGS_DIR" << endl;
-    cout << "  PLUGINATOR_MAX_BACKUPS" << endl;
-    cout << "  PLUGINATOR_MAX_LOG_DAYS" << endl;
-    cout << "  PLUGINATOR_MINECRAFT_VERSION" << endl;
-    cout << endl;
     
     // show current language setting
-    cout << Colors::BLUE << "Language Settings:" << Colors::NC << endl;
-    cout << "  Current language: " << Lang::getInstance().getLanguage() << endl;
-    cout << "  Available languages: en, es" << endl;
+    cout << Colors::BLUE << LANG("config.lang_settings") << Colors::NC << endl;
+    cout << LANG("config.lang_current") << Lang::getInstance().getLanguage() << endl;
+    cout << LANG("config.lang_available") << endl;
     cout << endl;
     
     // show plugin summary
-    cout << Colors::BLUE << "Plugin Summary:" << Colors::NC << endl;
-    cout << "  Total configured plugins: " << plugins.size() << endl;
-    cout << "  Plugin versions file: " << pluginVersionsFile << endl;
+    cout << Colors::BLUE << LANG("config.plugin_summary") << Colors::NC << endl;
+    cout << LANG("config.plugin_total") << plugins.size() << endl;
+    cout << LANG("config.plugin_versions_file") << pluginVersionsFile << endl;
     cout << endl;
 }
 
@@ -477,12 +540,12 @@ void Pluginator::sync() {
 
     // confirm plugins dir exists for both servers
     if (!exists(prodPluginsPath)) {
-        logger.err(LANGF("error.directory_not_found", prodPluginsPath));
+        logger.err(LANGF("error.dir_not_found", prodPluginsPath));
         return;
     }
 
     if (!exists(testPluginsPath)) {
-        logger.err(LANGF("error.directory_not_found", testPluginsPath));
+        logger.err(LANGF("error.dir_not_found", testPluginsPath));
         return;
     }
 
@@ -493,7 +556,7 @@ void Pluginator::sync() {
     logger.log(LANG("sync.removing_jars"));
     int removedCount = 0;
     for (const auto& entry : directory_iterator(testPluginsPath)) {
-        if (entry.path().extension() == ".jar") {
+        if (entry.path().extension() == ".jar" || entry.path().extension() == ".DIS") {
             try {
                 remove(entry.path());
                 logger.debug(LANGF("sync.removed", entry.path().filename().string()));
@@ -514,12 +577,17 @@ void Pluginator::sync() {
             try {
                 path destination = path(testPluginsPath) / entry.path().filename();
                 copy_file(entry.path(), destination);
-                logger.debug("Copied: " + entry.path().filename().string());
+                logger.debug(LANGF("sync.copied", entry.path().filename().string()));
                 copiedCount++;
             } catch (const exception& e) {
-                logger.warn("Failed to copy: " + entry.path().filename().string());
+                logger.warn(LANGF("error.failed_to_copy", entry.path().filename().string()));
             }
         }
+    }
+
+    if (!foundJars) {
+        logger.warn(LANG("sync.no_jars"));
+        return;
     }
 
     logger.success(LANGF("sync.completed", to_string(copiedCount)));
@@ -538,12 +606,12 @@ void Pluginator::migrateToProduction() {
 
     // confirm plugins dir exists for both servers
     if (!exists(prodPluginsPath)) {
-        logger.err(LANGF("error.directory_not_found", prodPluginsPath));
+        logger.err(LANGF("error.dir_not_found", prodPluginsPath));
         return;
     }
 
     if (!exists(testPluginsPath)) {
-        logger.err(LANGF("error.directory_not_found", testPluginsPath));
+        logger.err(LANGF("error.dir_not_found", testPluginsPath));
         return;
     }
 
@@ -562,7 +630,7 @@ void Pluginator::migrateToProduction() {
     backup(prodServerPath, "prod_plugins_before_migration");
 
     // start the migration
-    logger.log(LANG("migrate.starting"));
+    logger.info(LANG("migrate.starting"));
 
     // remove the .DIS extentions from test before copying
     enablePluginsForTest();
@@ -577,10 +645,10 @@ void Pluginator::migrateToProduction() {
             try {
                 path destination = path(prodPluginsPath) / entry.path().filename();
                 copy_file(entry.path(), destination, copy_options::overwrite_existing);
-                logger.log("Migrated: " + entry.path().filename().string());
+                logger.debug(LANGF("migrate.info", entry.path().filename().string()));
                 copiedCount++;
             } catch (const exception& e) {
-                logger.warn("Failed to migrate: " + entry.path().filename().string());
+                logger.warn(LANGF("migrate.failed", entry.path().filename().string()));
             }
         }
     }
@@ -588,6 +656,9 @@ void Pluginator::migrateToProduction() {
     if (!foundJars) {
         logger.warn(LANG("migrate.no_jars"));
     }
+
+    // disable plugins in test server again
+    disablePluginsForTest();
 
     // copy server jar if it was updated
     bool serverJarCopied = false;
@@ -611,32 +682,83 @@ void Pluginator::migrateToProduction() {
 
 /**
  * disablePluginsForTest
- * @brief function to add a "dis" extention for any plugin we don't want running on the Test Server
+ * @brief function to add a ".DIS" extension for any plugin we don't want running on the Test Server
  */
 void Pluginator::disablePluginsForTest() {
-    logger.log(LANG("plugin.disabled.starting"));
+    logger.info(LANG("plugin.disabled.starting"));
 
     string testPluginsPath = testServerPath + "/plugins";
     int disabledCount = 0;
 
+    // debug: show what plugins should be disabled
+    vector<Plugin> pluginsToDisable;
     for (const Plugin& plugin : plugins) {
         if (plugin.disableOnTest) {
-            // find the matching files and add .DIS extension
-            for (const auto& entry : directory_iterator(testPluginsPath)) {
-                if (!entry.is_regular_file()) { continue; }
+            pluginsToDisable.push_back(plugin);
+            logger.debug(LANGF("plugin.disabled.marked",  plugin.name));
+        }
+    }
+    
+    logger.debug(LANGF("plugin.disabled.marked.found", to_string(pluginsToDisable.size())));
+    
+    if (pluginsToDisable.empty()) {
+        logger.log(LANG("plugin.disabled.no_need"));
+        return;
+    }
 
-                // pattern matching
-                string filename = entry.path().filename().string();
-                string searchPattern = plugin.name.substr(0, min(3, (int)plugin.name.length()));
-                if (filename.find(searchPattern) != string::npos && (filename.length() >= 4 && filename.substr(filename.length() - 4) == ".jar")) {
-                    try {
-                        path newPath = entry.path().string() + ".DIS";
-                        rename(entry.path(), newPath);
-                        logger.log(LANGF("plugin.disabled.count", filename, newPath.filename().string()));
-                        disabledCount++;
-                    } catch (const exception& e) {
-                        logger.warn(LANGF("plugin.disabled.fail", filename));
-                    }
+    // check each plugin that should be disabled
+    for (const Plugin& plugin : pluginsToDisable) {
+        logger.debug(LANGF("plugin.disabled.processing", plugin.name));
+        
+        // use existing robust matching logic
+        string foundFile = pluginManager.findMatchingPluginFile(plugin.name, testPluginsPath);
+        
+        if (!foundFile.empty()) {
+            logger.debug(LANGF("plugin.version.detect.match", foundFile));
+            
+            try {
+                path currentPath = path(testPluginsPath) / foundFile;
+                path newPath = currentPath.string() + ".DIS";
+                
+                logger.debug(LANGF("plugin.disabled.current_path", currentPath.string()));
+                logger.debug(LANGF("plugin.disabled.new_path", newPath.string()));
+                
+                // check if source file exists
+                if (!exists(currentPath)) {
+                    logger.warn(LANGF("plugin.disabled.source_dne", currentPath.string()));
+                    continue;
+                }
+                
+                // check if .DIS file already exists
+                if (exists(newPath)) {
+                    logger.debug(LANGF("plugin.disabled.already_dis", foundFile));
+                    disabledCount++; // count as disabled
+                    continue;
+                }
+                
+                // attempt the rename
+                rename(currentPath, newPath);
+                
+                // verify it worked
+                if (exists(newPath) && !exists(currentPath)) {
+                    logger.log(LANGF("plugin.disabled.count", foundFile, newPath.filename().string()));
+                    disabledCount++;
+                } else {
+                    logger.err(LANGF("plugin.disabled.rename_failed", foundFile));
+                }
+                
+            } catch (const exception& e) {
+                logger.err(LANGF("plugin.disabled.failed", foundFile, string(e.what())));
+            }
+        } else {
+            logger.warn(LANGF("plugin.disabled.no_matching_file", plugin.name));
+            logger.debug(LANGF("plugin.disabled.searched_in", testPluginsPath));
+            
+            // debug: show what files are actually in the directory
+            logger.debug(LANG("plugin.available_jars"));
+            for (const auto& entry : directory_iterator(testPluginsPath)) {
+                if (entry.is_regular_file() && entry.path().extension() == ".jar") {
+                    logger.debug("  " + entry.path().filename().string());
                 }
             }
         }
@@ -645,7 +767,7 @@ void Pluginator::disablePluginsForTest() {
     if (disabledCount > 0) {
         logger.success(LANGF("plugin.disabled.completed", to_string(disabledCount)));
     } else {
-        logger.log(LANG("plugin.disabled.no_need"));
+        logger.warn(LANG("plugin.disabled.no_dis"));
     }
 }
 
@@ -660,7 +782,7 @@ void Pluginator::enablePluginsForTest() {
 
     // confirm plugin path exists for test server
     if (!exists(testPluginsPath)) {
-        logger.err(LANGF("error.directory_not_found", testPluginsPath));
+        logger.err(LANGF("error.dir_not_found", testPluginsPath));
         return;
     }
 
@@ -685,5 +807,4 @@ void Pluginator::enablePluginsForTest() {
     } else {
         logger.log(LANG("plugin.enabled.no_need"));
     }
-    
 }

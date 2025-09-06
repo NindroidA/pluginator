@@ -1,7 +1,9 @@
 #include "../include/lang.hpp"
+#include "../include/logger.hpp"
 #include "../include/utils.hpp"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <regex>
 #include <filesystem>
 
@@ -14,7 +16,7 @@ Lang::Lang() : currentLanguage("en") {
 
 /**
  * getInstance
- * @brief function to get the current lang instance
+ * @brief get the current lang instance
  * @returns reference to the lang instance
  */
 Lang& Lang::getInstance() {
@@ -26,149 +28,168 @@ Lang& Lang::getInstance() {
 
 /**
  * loadFromJson
- * @brief function to load lang strings from a json file
+ * @brief function to load lang strings from a nested JSON file
+ * @param filename string reference to the name of the file
+ */
+/**
+ * loadFromJson
+ * @brief function to load lang strings from a flat JSON file
  * @param filename string reference to the name of the file
  */
 void Lang::loadFromJson(const string& filename) {
-    // simple json parser thingy
     ifstream file(filename);
     if (!file.is_open()) {
-        // if there is no file, load the defaults
-        loadDefaultStrings();
+        cerr << "[LANG] Warning: Could not open language file: " << filename << endl;
         return;
     }
 
+    // clear existing strings
+    strings.clear();
+    
     string line;
+    int lineNumber = 0;
+    
     while (getline(file, line)) {
-        // skip comments and empty lines
-        if (line.empty() || line.find("//") == 0 || line.find("#") == 0) { continue; }
-
-        // "key": "value"
+        lineNumber++;
+        
+        // trim whitespace
+        line.erase(0, line.find_first_not_of(" \t\r\n"));
+        line.erase(line.find_last_not_of(" \t\r\n") + 1);
+        
+        // skip empty lines, comments, and structural JSON
+        if (line.empty() || 
+            line.find("//") == 0 || 
+            line.find("#") == 0 || 
+            line == "{" || 
+            line == "}") {
+            continue;
+        }
+        
+        // look for key-value pairs: "key": "value"
         size_t colonPos = line.find(":");
-        if (colonPos != string::npos) {
-            // extract key (remove quotes, whitespace)
-            string key = line.substr(0, colonPos);
-            key = regex_replace(key, regex("[\"'\\s]"), "");
-
-            // extract value (remove quotes, comma, trim)
-            string value = line.substr(colonPos + 1);
-            value = regex_replace(value, regex("^\\s*[\"']"), "");
-            value = regex_replace(value, regex("[\"'],?\\s*$"), ""); 
-
-            if (!key.empty() && !value.empty()) {
-                strings[key] = value;
-            }
+        if (colonPos == string::npos) {
+            continue;
+        }
+        
+        // extract key (everything before colon)
+        string key = line.substr(0, colonPos);
+        
+        // clean key: remove quotes, spaces, tabs
+        key = regex_replace(key, regex("^\\s*[\"']"), "");    // remove leading quotes/whitespace
+        key = regex_replace(key, regex("[\"']\\s*$"), "");    // remove trailing quotes/whitespace
+        
+        // extract value (everything after colon)
+        string value = line.substr(colonPos + 1);
+        
+        // clean value: remove quotes, trailing comma, spaces
+        value = regex_replace(value, regex("^\\s*[\"']"), "");      // remove leading quotes/whitespace
+        value = regex_replace(value, regex("[\"'],?\\s*$"), "");    // remove trailing quotes/comma/whitespace
+        
+        // unescape common JSON escape sequences
+        value = regex_replace(value, regex("\\\\\""), "\"");  // \"
+        value = regex_replace(value, regex("\\\\\\\\"), "\\"); // (double backslash)  
+        value = regex_replace(value, regex("\\\\n"), "\n");   // \n
+        value = regex_replace(value, regex("\\\\t"), "\t");   // \t
+        
+        // only add non-empty key-value pairs
+        if (!key.empty() && !value.empty()) {
+            strings[key] = value;
         }
     }
+    
     file.close();
+    
+    // report results
+    if (!strings.empty()) {
+        cout << "[LANG] ✅ Loaded " << strings.size() << " language strings from " << filename << endl;
+    } else {
+        cerr << "[LANG] ⚠️ No valid strings found in " << filename << endl;
+    }
 }
 
 /**
- * loadDefaultStrings
- * @brief redundant function to load default hard coded lang strings (Englsih)
+ * parseJsonObject
+ * @brief parse a JSON object and flatten nested keys with dot notation
+ * @param jsonStr the JSON string to parse
+ * @param keyPrefix prefix for nested keys (e.g., "cmd" becomes "cmd.")
  */
-void Lang::loadDefaultStrings() {
-    // default english strings
-    strings["app.title"] = "🎮 Pluginator C++";
-    strings["app.version"] = "Version";
-    strings["app.goodbye"] = "Farewell gamer! 🎮";
-    strings["app.session_started"] = "Pluginator session started!";
-    strings["app.session_ended"] = "Pluginator session ended!";
+void Lang::parseJsonObject(const string& jsonStr, const string& keyPrefix) {
+    istringstream stream(jsonStr);
+    string line;
     
-    // menu strings
-    strings["menu.update_operations"] = "🔄 UPDATE OPERATIONS:";
-    strings["menu.backup_operations"] = "💾 BACKUP OPERATIONS:";
-    strings["menu.deployment"] = "🔄 DEPLOYMENT:";
-    strings["menu.server_management"] = "⚙️  SERVER MANAGEMENT:";
-    strings["menu.exit"] = "🚪 Exit";
-    strings["menu.choose_option"] = "Choose an option: ";
-    strings["menu.press_enter"] = "Press Enter to continue ...";
-    strings["menu.invalid_option"] = "Invalid option. Please choose 0-12.";
-    
-    // operations
-    strings["sync.starting"] = "Syncing plugins from Production → Test ...";
-    strings["sync.completed"] = "Plugin sync completed! Copied {0} plugins";
-    strings["sync.removing_jars"] = "Removing old JAR files from test server ...";
-    strings["sync.copying_jars"] = "Copying plugins from Production → Test ...";
-    strings["sync.no_jars"] = "No jar files found in production server directory!";
-    strings["sync.removed"] = "Removed: {0}";
-    strings["sync.copied"] = "Copied: {0}";
-    
-    // backup strings
-    strings["backup.creating"] = "Creating backup: {0}";
-    strings["backup.created"] = "Backup created: {0}";
-    strings["backup.failed"] = "Failed to create backup!";
-    strings["backup.cleanup"] = "Cleaning up old backups (keeping {0} newest) ...";
-    strings["backup.cleanup_completed"] = "Cleaned up {0} old backup files";
-    strings["backup.no_backups"] = "No backups found.";
-    strings["backup.recent_title"] = "📋 Recent Backups:";
-    strings["backup.directory_not_found"] = "Backup directory not found: {0}";
-    
-    // migration strings
-    strings["migrate.starting"] = "🚚 Migrating plugins from Test → Production ...";
-    strings["migrate.warning"] = "This will replace production with Test Server state!";
-    strings["migrate.confirm"] = "Are you sure? (y/n): ";
-    strings["migrate.cancelled"] = "Migration cancelled.";
-    strings["migrate.backup"] = "Creating production backup before migration ...";
-    strings["migrate.plugins_copied"] = "Copied {0} plugins";
-    strings["migrate.no_jars"] = "No jar files found in test server plugins directory";
-    strings["migrate.purpur.copied"] = "Purpur jar copied to production.";
-    strings["migrate.purpur.fail"] = "Failed to copy server jar: {0}";
-    strings["migrate.completed"] = "Migration completed! Copied {0}";
-    
-    // plugin strings
-    strings["plugin.disabled.starting"] = "🚫 Disabling selected plugins for Test Server ...";
-    strings["plugin.disabled.count"] = "Disabled: {0} → {1}";
-    strings["plugin.disabled.fail"] = "Failed to disable: {0}";
-    strings["plugin.disabled.no_need"] = "No plugins were re-enabled.";
-    strings["plugin.disabled.completed"] = "Re-enabled {0} plugins";
-    strings["plugin.enabled.starting"] = "";
-    strings["plugin.enabled.count"] = "Re-enabled: {0} → {1}";
-    strings["plugin.checking"] = "Checking {0} ...";
-    strings["plugin.up_to_date"] = "Up to date";
-    strings["plugin.update_available"] = "Update available!";
-    strings["plugin.new_plugin"] = "New plugin (not tracked yet)";
-    strings["plugin.checking_all"] = "Checking all plugin updates...";
-    strings["plugin.versions_file_created"] = "Plugin versions file created";
-    strings["plugin.versions_loaded"] = "Loaded {0} plugin versions";
-    strings["plugin.version_updated"] = "Updated {0} version to {1}";
-    strings["plugin.configurations_loaded"] = "Loaded {0} plugin configurations";
-    strings["plugin.downloading"] = "Downloading {0} ...";
-    strings["plugin.download_success"] = "Successfully downloaded {0}";
-    strings["plugin.download_failed"] = "Failed to download {0}";
-    strings["plugin.check_failed"] = "Failed to check {0}: {1}";
-    strings["plugin.already_updated"] = "{0} is already up to date";
-    strings["plugin.old_removed"] = "Removed old version: {0}";
-    strings["plugin.remove_failed"] = "Failed to remove old version: {0}";
-    strings["plugin.updated_successfully"] = "Updated successfully";
-    strings["plugin.update_failed"] = "Update failed";
-    strings["plugin.update_summary"] = "{0} updates available, {1} errors";
-    strings["plugin.update_summary_downloaded"] = "Downloaded {0} plugin updates";
-
-    // purpur settings
-    strings["purpur.checking"] = "Checking for Purpur updates ...";
-    strings["purpur.latest_version"] = "Latest version: {0}";
-    strings["purpur.latest_build"] = "Latest build: {0}";
-    strings["purpur.build_result"] = "Build result: {0}";
-    strings["purpur.build_failed"] = "Latest build failed. Check back later for a successful build.";
-    strings["purpur.downloading"] = "Downloading Purpur version {0} ...";
-    strings["purpur.download_success"] = "Successfully downloaded Purpur {0}";
-    strings["purpur.download_failed"] = "Failed to download Purpur {0}";
-    strings["purpur.download_prompt"] = "Would you like to download the latest version? (y/n): ";
-    strings["purpur.downloaded_cancelled"] = "Download cancelled.";
-    strings["purpur.downloaded_to"] = "Purpur downloaded to: {0}";
-    
-    // error strings
-    strings["error.directory_not_found"] = "Directory not found: {0}";
-    strings["error.file_not_found"] = "File not found: {0}";
-    strings["error.failed_to_copy"] = "Failed to copy: {0}";
-    strings["error.failed_to_remove"] = "Failed to remove: {0}";
-    
-    // log strings
-    strings["log.recent_title"] = "📋 Recent Log Files:";
-    strings["log.latest_entries"] = "Latest log entries:";
-    strings["log.no_entries"] = "No entries in today's log yet.";
-    strings["log.cleanup"] = "Cleaned up {0} old log files (older than {1} days)";
+    while (getline(stream, line)) {
+        // trim whitespace
+        line.erase(0, line.find_first_not_of(" \t\r\n"));
+        line.erase(line.find_last_not_of(" \t\r\n") + 1);
+        
+        // skip empty lines, comments, and braces
+        if (line.empty() || line[0] == '/' || line[0] == '#' || line == "{" || line == "}") {
+            continue;
+        }
+        
+        // look for key-value pairs
+        size_t colonPos = line.find(":");
+        if (colonPos == string::npos) continue;
+        
+        // extract key
+        string key = line.substr(0, colonPos);
+        key = regex_replace(key, regex("^\\s*[\"']"), "");    // remove leading quotes/spaces
+        key = regex_replace(key, regex("[\"']\\s*$"), "");    // remove trailing quotes/spaces
+        
+        if (key.empty()) continue;
+        
+        // extract value part after colon
+        string valuePart = line.substr(colonPos + 1);
+        valuePart.erase(0, valuePart.find_first_not_of(" \t"));
+        
+        // check if this line starts a nested object
+        if (valuePart.find("{") != string::npos) {
+            // this is a nested object - collect all lines until matching }
+            string nestedContent = "";
+            int braceCount = 0;
+            
+            // count braces in current line
+            for (char c : valuePart) {
+                if (c == '{') braceCount++;
+                if (c == '}') braceCount--;
+            }
+            
+            // if braces don't close on same line, collect more lines
+            if (braceCount > 0) {
+                string nestedLine;
+                while (getline(stream, nestedLine) && braceCount > 0) {
+                    nestedContent += nestedLine + "\n";
+                    for (char c : nestedLine) {
+                        if (c == '{') braceCount++;
+                        if (c == '}') braceCount--;
+                    }
+                }
+            }
+            
+            // recursively parse nested content
+            string newPrefix = keyPrefix.empty() ? key : keyPrefix + "." + key;
+            parseJsonObject(nestedContent, newPrefix);
+            
+        } else {
+            // this is a simple string value
+            string value = valuePart;
+            
+            // remove quotes and trailing comma
+            value = regex_replace(value, regex("^\\s*[\"']"), "");
+            value = regex_replace(value, regex("[\"'],?\\s*$"), "");
+            
+            // unescape common JSON escape sequences  
+            value = regex_replace(value, regex("\\\\\""), "\"");
+            value = regex_replace(value, regex("\\\\\\\\"), "\\");
+            value = regex_replace(value, regex("\\\\n"), "\n");
+            value = regex_replace(value, regex("\\\\t"), "\t");
+            
+            if (!key.empty() && !value.empty()) {
+                string fullKey = keyPrefix.empty() ? key : keyPrefix + "." + key;
+                strings[fullKey] = value;
+            }
+        }
+    }
 }
 
 /**
@@ -231,13 +252,71 @@ string Lang::format(const string& key, const string& arg1, const string& arg2, c
     return str;
 }
 
+/**
+ * formatSafe
+ * @brief safer formatting function that handles variable argument counts
+ * @param key string reference to the lang key
+ * @param args vector of arguments to substitute
+ * @returns safe formatted string
+ */
+string Lang::formatSafe(const string& key, const vector<string>& args) const {
+    string str = get(key);
+    
+    // replace placeholders {0}, {1}, {2}, etc.
+    for (size_t i = 0; i < args.size(); ++i) {
+        string placeholder = "{" + to_string(i) + "}";
+        size_t pos = 0;
+        while ((pos = str.find(placeholder, pos)) != string::npos) {
+            str.replace(pos, placeholder.length(), args[i]);
+            pos += args[i].length();
+        }
+    }
+    
+    return str;
+}
+
+/**
+ * hasKey
+ * @brief check if a language key exists
+ * @param key string reference to check
+ * @returns boolean value of if the key exists
+ */
+bool Lang::hasKey(const string& key) const {
+    return strings.find(key) != strings.end();
+}
+
+/**
+ * getMissingKeys  
+ * @brief check which required keys are missing from loaded strings
+ * @param requiredKeys vector of keys that should exist
+ * @returns vector string of missing keys
+ */
+vector<string> Lang::getMissingKeys(const vector<string>& requiredKeys) const {
+    vector<string> missing;
+    for (const string& key : requiredKeys) {
+        if (!hasKey(key)) {
+            missing.push_back(key);
+        }
+    }
+    return missing;
+}
+
+/**
+ * getLoadedStringCount
+ * @brief get count of loaded language strings
+ * @returns int number of loaded strings
+ */
+int Lang::getLoadedStringCount() const {
+    return static_cast<int>(strings.size());
+}
+
 string Lang::operator[](const string& key) const {
     return get(key);
 }
 
 /**
  * setLanguage
- * @brief function to set the language of the program
+ * @brief set the language of the program
  * @param lang string reference to the desired lang (short form)
  */
 void Lang::setLanguage(const string& lang) {
@@ -248,7 +327,7 @@ void Lang::setLanguage(const string& lang) {
 
 /**
  * reloadStrings
- * @brief function to reload lang json file
+ * @brief reload lang json file
  */
 void Lang::reloadStrings() {
     strings.clear();
@@ -257,7 +336,7 @@ void Lang::reloadStrings() {
 
 /**
  * printLoadedStrings
- * @brief function to print all the loaded strings in the program
+ * @brief print all the loaded strings in the program
  */
 void Lang::printLoadedStrings() const {
     cout << "\n📋 Loaded Language Strings (" << currentLanguage << "):\n";

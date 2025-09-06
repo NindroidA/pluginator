@@ -22,7 +22,7 @@ PurpurInfo PurpurManager::checkPurpurUpdate() {
     HttpResponse versionResponse = httpClient.get("https://api.purpurmc.org/v2/purpur");
     
     if (!versionResponse.success) {
-        info.error = "Failed to fetch Purpur versions: " + versionResponse.error;
+        info.error = LANGF("purpur.fetch_failed", versionResponse.error);
         return info;
     }
     
@@ -30,7 +30,7 @@ PurpurInfo PurpurManager::checkPurpurUpdate() {
     info.latestVersion = JsonHelper::extractNestedValue(versionResponse.body, "metadata.current");
     
     if (info.latestVersion.empty()) {
-        info.error = "Could not parse latest Purpur version";
+        info.error = LANG("purpur.parse_failed");
         return info;
     }
     
@@ -41,7 +41,7 @@ PurpurInfo PurpurManager::checkPurpurUpdate() {
     HttpResponse buildResponse = httpClient.get(buildUrl);
     
     if (!buildResponse.success) {
-        info.error = "Failed to fetch build info: " + buildResponse.error;
+        info.error = LANGF("purpur.build.fetch_failed", buildResponse.error);
         return info;
     }
     
@@ -49,7 +49,7 @@ PurpurInfo PurpurManager::checkPurpurUpdate() {
     info.buildResult = JsonHelper::extractValue(buildResponse.body, "result");
     
     if (info.latestBuild.empty()) {
-        info.error = "Could not parse latest build number";
+        info.error = LANG("purpur.build.parse_failed");
         return info;
     }
     
@@ -79,7 +79,7 @@ bool PurpurManager::downloadPurpur(const string& version, const string& outputPa
     
     string url = "https://api.purpurmc.org/v2/purpur/" + version + "/latest/download";
     
-    // The fancy progress bar will be shown by HttpClient
+    // the fancy progress bar will be shown by HttpClient
     bool success = httpClient.downloadFile(url, outputPath, nullptr);
     
     cout << endl; // extra spacing after progress bar
@@ -106,8 +106,9 @@ bool PurpurManager::downloadPurpur(const string& version, const string& outputPa
 
 void PurpurManager::showPurpurStatus() {
     PurpurInfo info = checkPurpurUpdate();
+    string buildRes;
     
-    cout << endl << Colors::BLUE << "🎯 Purpur Server Status:" << Colors::NC << endl;
+    cout << endl << Colors::BLUE << LANG("purpur.status.run") << Colors::NC << endl;
     cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" << endl;
     
     if (!info.error.empty()) {
@@ -115,16 +116,14 @@ void PurpurManager::showPurpurStatus() {
         return;
     }
     
-    cout << "  Latest Version: " << Colors::GREEN << info.latestVersion << Colors::NC << endl;
-    cout << "  Latest Build:   " << Colors::GREEN << info.latestBuild << Colors::NC << endl;
-    cout << "  Build Status:   ";
-    
     if (info.buildResult == "SUCCESS") {
-        cout << Colors::GREEN << info.buildResult << Colors::NC << endl;
+        buildRes = Colors::GREEN.c_str() + info.buildResult + Colors::NC.c_str();
     } else {
-        cout << Colors::YELLOW << info.buildResult << Colors::NC << endl;
+        buildRes = Colors::YELLOW.c_str() + info.buildResult + Colors::NC.c_str();
     }
+
+    cout << LANGF("purpur.status.summary", info.latestVersion, info.latestBuild, buildRes);
     
-    cout << "  Download URL:   " << info.downloadUrl << endl;
+    cout << LANGF("purpur.status.url", info.downloadUrl) << endl;
     cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" << endl;
 }

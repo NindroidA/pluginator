@@ -1,7 +1,11 @@
+#include "../include/lang.hpp"
 #include "../include/utils.hpp"
 #include <sstream>
+#include <iostream>
 #include <iomanip>
 #include <filesystem>
+
+using namespace std;
 
 namespace Utils {
     
@@ -71,9 +75,19 @@ namespace Utils {
         try {
             auto binaryPath = std::filesystem::canonical("/proc/self/exe");
             auto installDir = binaryPath.parent_path().parent_path();
+            
+            // Debug output
+            cout << LANGF("utils.debug_bin", binaryPath) << endl;
+            cout << LANGF("utils.debug_dir", installDir) << endl;
+            
             return installDir.string();
         } catch (const std::exception& e) {
-            // fallback
+            // Fallback: try to detect if we're in a development environment
+            if (std::filesystem::exists("./src") && std::filesystem::exists("./include")) {
+                // We're probably running from project root
+                return std::filesystem::current_path().string();
+            }
+            // Final fallback
             return "/opt/pluginator";
         }
     }

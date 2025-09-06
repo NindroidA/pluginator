@@ -1,4 +1,5 @@
 #include "../include/config.hpp"
+#include "../include/lang.hpp"
 #include "../include/utils.hpp"
 #include <iostream>
 #include <fstream>
@@ -9,21 +10,6 @@
 Config* Config::instance = nullptr;
 
 Config::Config() {
-    // set defaults
-    /*
-    settings["PROD_SERVER_PATH"] = "./SERVER/prod";
-    settings["TEST_SERVER_PATH"] = "./SERVER/test";
-    settings["BACKUP_DIR"] = "./data/backups";
-    settings["LOGS_DIR"] = "./data/logs";
-    settings["PLUGIN_VERSIONS_FILE"] = "./data/plugin_versions.json";
-    settings["MAX_BACKUPS"] = "2";
-    settings["MAX_LOG_DAYS"] = "30";
-    settings["MINECRAFT_VERSION"] = "1.21.8";
-    */
-
-    // load from env variables
-    //loadFromEnv();
-
     // load the config
     string configFile = Utils::getConfigPath("pluginator.config");
     loadFromFile(configFile);
@@ -141,9 +127,6 @@ void Config::set(const string& key, const string& value) {
 void Config::loadConfig(const string& filename) {
     // load config from the specified file
     loadFromFile(filename);
-    
-    // also reload environment variables to ensure they take precedence
-    //loadFromEnv();
 }
 
 /**
@@ -155,8 +138,8 @@ void Config::saveConfig(const string& filename) {
     ofstream file(filename);
     if (!file.is_open()) return;
 
-    file << "# Pluginator Configuration File\n";
-    file << "# Environment variables take precedence over these values\n\n";
+    file << LANG("config.file_title");
+    file << LANG("config.file_subtitle");
 
     for (const auto& pair : settings) {
         file << pair.first << "=" << pair.second << "\n";
@@ -169,7 +152,7 @@ void Config::saveConfig(const string& filename) {
  * @brief function to print the current config settings
  */
 void Config::printConfig() const {
-    cout << "\n📋 Current Configuration:\n";
+    cout << LANG("config.print_title");
     cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
     
     for (const auto& pair : settings) {

@@ -3,6 +3,34 @@
 #include <sstream>
 
 /**
+ * parseBooleanValue
+ * @brief parse boolean value from string input
+ * @param value string reference containing boolean representation ("true", "false", "1", "0")
+ * @return boolean value of the inputted value
+ */
+bool JsonHelper::parseBooleanValue(const string& value) {
+    string lowerValue = value;
+    transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
+    
+    // handle JSON boolean values
+    if (lowerValue == "true" || lowerValue == "1") return true;
+    if (lowerValue == "false" || lowerValue == "0") return false;
+    
+    // default to false for invalid values
+    return false;
+}
+
+/**
+ * parseBooleanValue
+ * @brief parse boolean value from int input
+ * @param value int containing boolean representation (0 = false, !0 = true)
+ * @return bolean value of the inputted value
+ */
+bool JsonHelper::parseBooleanValue(int value) {
+    return value != 0;
+}
+
+/**
  * parseSimpleObject
  * @brief simple json parsing function
  * @param json string reference to the json file
@@ -28,9 +56,22 @@ map<string, string> JsonHelper::parseSimpleObject(const string& json) {
     // handle numeric values
     regex numericRegex("\"([^\"]+)\"\\s*:\\s*([0-9.]+)");
     sregex_iterator numIter(json.begin(), json.end(), numericRegex);
-    
+
     for (; numIter != end; ++numIter) {
         smatch match = *numIter;
+        if (match.size() == 3) {
+            string key = match[1].str();
+            string value = match[2].str();
+            result[key] = value;
+        }
+    }
+
+    // handle boolean values
+    regex booleanRegex("\"([^\"]+)\"\\s*:\\s*(true|false)");
+    sregex_iterator boolIter(json.begin(), json.end(), booleanRegex);
+
+    for (; boolIter != end; ++boolIter) {
+        smatch match = *boolIter;
         if (match.size() == 3) {
             string key = match[1].str();
             string value = match[2].str();

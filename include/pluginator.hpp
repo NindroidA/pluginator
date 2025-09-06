@@ -35,6 +35,7 @@ public:
     void backupProduction();
     void backupTest();
     void viewRecentBackups();
+    void viewRecentLogs();
 
     // bulk jar functions
     void sync();

@@ -7,6 +7,10 @@ using namespace std;
 
 class JsonHelper {
 public:
+    // type helpers
+    static bool parseBooleanValue(const string& value);
+    static bool parseBooleanValue(int value);
+
     // json parsing for pairs
     static map<string, string> parseSimpleObject(const string& json);
     //static vector<map<string, string>> parseArray(const string& json);

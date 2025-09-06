@@ -20,6 +20,7 @@ PluginManager::PluginManager(Logger& log) : logger(log) {
     pluginVersionsFile = Config::getInstance().getPluginVersionsFile();
     httpClient.setUserAgent("Pluginator");
     httpClient.setTimeout(30);
+    loadTypeCache();
 }
 
 /**
@@ -74,7 +75,7 @@ bool PluginManager::savePluginVersions() {
 }
 
 string PluginManager::extractVersionFromFilename(const string& filename) {
-    logger.debug("Extracting version from: " + filename);
+    logger.debug(LANGF("plugin.extract_version", filename));
     
     // remove .jar extension
     string name = filename;
@@ -82,7 +83,7 @@ string PluginManager::extractVersionFromFilename(const string& filename) {
         name = name.substr(0, name.length() - 4);
     }
     
-    logger.debug("  Filename without .jar: " + name);
+    logger.debug(LANGF("plugin.without_jar", name));
     
     // updated version patterns to handle your specific files
     vector<pair<regex, string>> patterns = {
@@ -98,12 +99,12 @@ string PluginManager::extractVersionFromFilename(const string& filename) {
         smatch match;
         if (regex_search(name, match, pattern)) {
             string version = match[1].str();
-            logger.debug("  Matched pattern (" + description + "): " + version);
+            logger.debug(LANGF("plugin.pattern.matched", description, version));
             return version;
         }
     }
     
-    logger.debug("  No version pattern matched");
+    logger.debug(LANG("plugin.pattern.no"));
     return "";
 }
 
@@ -152,7 +153,7 @@ bool PluginManager::loadPluginConfigs(const string& configFile) {
         map<string, string> pluginData = JsonHelper::parseSimpleObject(pluginJson);
         
         if (pluginData["enabled"] == "false") {
-            logger.debug("Skipping disabled plugin: " + pluginData["name"]);
+            logger.debug(LANGF("plugin.disabled.skipping", pluginData["name"]));
             continue;
         }
         
@@ -160,7 +161,7 @@ bool PluginManager::loadPluginConfigs(const string& configFile) {
         if (!plugin.name.empty()) {
             plugins.push_back(plugin);
             loadedCount++;
-            logger.debug("Loaded plugin: " + plugin.name + " (type: " + plugin.type + ")");
+            logger.debug(LANGF("plugin.loaded", plugin.name, plugin.type));
         }
     }
 
@@ -192,9 +193,9 @@ Plugin PluginManager::parsePluginFromJson(const map<string, string>& data) {
     plugin.resourceId = getValue("resourceId");
     plugin.projectSlug = getValue("projectSlug"); 
     plugin.filenamePattern = getValue("filenamePattern");
-    plugin.mcVersion = getValue("mcVersion", 
-                               Config::getInstance().getMinecraftVersion());
-    plugin.disableOnTest = (getValue("disableOnTest") == "true");
+    plugin.mcVersion = getValue("mcVersion", Config::getInstance().getMinecraftVersion());
+    
+    plugin.disableOnTest = JsonHelper::parseBooleanValue(getValue("disableOnTest"));
     
     if (type == "github") {
         plugin.resourceId = getValue("repo");
@@ -215,7 +216,7 @@ Plugin PluginManager::parsePluginFromJson(const map<string, string>& data) {
  * @returns boolean value of whether the initialization was successful or not
  */
 bool PluginManager::initFromConfig(const string& configFile) {
-    logger.debug("Initializing plugin manager from config: " + configFile);
+    logger.debug(LANGF("plugin.config.init", configFile));
 
     // load all plugin versions
     if (storedVersions.empty()) {
@@ -312,7 +313,7 @@ bool PluginManager::updatePluginConfig(const string& pluginName, const Plugin& n
 
 /**
  * scanAndConfigurePlugins
- * @brief function to scan all the jar files in the specified plugins directory
+ * @brief function to scan all the jar files in the specified plugins directory with progress indication
  * @param pluginsPath string reference to the path where the plugins are stored
  */
 void PluginManager::scanAndConfigurePlugins(const string& pluginsPath) {
@@ -323,13 +324,32 @@ void PluginManager::scanAndConfigurePlugins(const string& pluginsPath) {
         return;
     }
     
-    vector<Plugin> detectedPlugins;
+    // load existing type cache
+    loadTypeCache();
     
+    // collect all jar files first to show accurate progress
+    vector<string> jarFiles;
     for (const auto& entry : directory_iterator(pluginsPath)) {
         if (!entry.is_regular_file()) continue;
         
         string filename = entry.path().filename().string();
         if (!endsWith(filename, ".jar") || endsWith(filename, ".jar.DIS")) continue;
+        
+        jarFiles.push_back(filename);
+    }
+    
+    if (jarFiles.empty()) {
+        logger.warn(LANGF("plugin.no_jars", pluginsPath));
+        return;
+    }
+    
+    vector<Plugin> detectedPlugins;
+    
+    // create progress bar for scanning
+    ProgressBar progressBar(static_cast<int>(jarFiles.size()), "Scanning Plugins", 50);
+    
+    for (size_t i = 0; i < jarFiles.size(); ++i) {
+        const string& filename = jarFiles[i];
         
         // extract plugin name from filename
         string pluginName = filename;
@@ -341,35 +361,57 @@ void PluginManager::scanAndConfigurePlugins(const string& pluginsPath) {
         // clean up common patterns
         pluginName = regex_replace(pluginName, regex("[-_]"), " ");
         
-        Plugin plugin(pluginName, guessPluginType(pluginName));
+        // update progress bar with current plugin
+        progressBar.update(static_cast<int>(i), pluginName);
+        
+        // detect plugin type (this may involve API calls)
+        string detectedType = guessPluginType(pluginName);
+        
+        // create new plugin object
+        Plugin plugin(pluginName, detectedType);
         plugin.filenamePattern = pluginName + "*.jar";
         
         detectedPlugins.push_back(plugin);
         logger.debug(LANGF("plugin.detected", pluginName, plugin.type));
     }
     
+    // finish progress bar
+    progressBar.finish("Scan completed!");
+    
     logger.success(LANGF("plugin.scan_completed", to_string(detectedPlugins.size())));
+    
+    // show summary of detected types
+    map<string, int> typeCounts;
+    for (const Plugin& plugin : detectedPlugins) {
+        typeCounts[plugin.type]++;
+    }
+    
+    logger.log(LANG("plugin.type.detected"));
+    for (const auto& typeCount : typeCounts) {
+        logger.log("  " + typeCount.first + ": " + to_string(typeCount.second));
+    }
     
     // offer to save configuration
     string response = logger.prompt(LANG("plugin.save_config_prompt"));
     if (response == "y" || response == "Y") {
         plugins = detectedPlugins;
         savePluginConfigs();
+        logger.success(LANG("plugin.config.saved"));
     }
 }
 
 void PluginManager::scanAndUpdateVersions(const string& pluginsPath) {
-    logger.log("Scanning plugin files to update version tracking...");
+    logger.log(LANG("plugin.scan.update_run"));
     
     if (!exists(pluginsPath)) {
-        logger.err("Plugins directory not found: " + pluginsPath);
+        logger.err(LANGF("error.dir_not_found", pluginsPath));
         return;
     }
     
     int totalPlugins = plugins.size();
     int updatedCount = 0;
     
-    ProgressBar progress(totalPlugins, "Scanning files");
+    ProgressBar progress(totalPlugins, LANG("plugin.scan.files"));
     
     for (int i = 0; i < totalPlugins; i++) {
         const Plugin& plugin = plugins[i];
@@ -383,22 +425,22 @@ void PluginManager::scanAndUpdateVersions(const string& pluginsPath) {
             
             if (currentStored != detectedVersion) {
                 setStoredVersion(plugin.name, detectedVersion);
-                logger.debug("Updated " + plugin.name + ": " + currentStored + " -> " + detectedVersion);
+                logger.debug(LANGF("plugin.scan.updated", plugin.name, currentStored, detectedVersion));
                 updatedCount++;
             }
         } else {
-            logger.debug("Could not detect version for: " + plugin.name);
+            logger.debug(LANGF("plugin.scan.no_version", plugin.name));
         }
     }
     
-    progress.finish("Updated " + to_string(updatedCount) + " plugin versions.");
+    progress.finish(LANGF("plugin.version.summary", to_string(updatedCount)));
 }
 
 void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
-    logger.log("Scanning plugin files with API verification...");
+    logger.log(LANG("plugin.version.api.run"));
     
     if (!exists(pluginsPath)) {
-        logger.err("Plugins directory not found: " + pluginsPath);
+        logger.err(LANGF("error.dir_not_found", pluginsPath));
         return;
     }
     
@@ -406,7 +448,7 @@ void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
     int updatedCount = 0;
     int apiUpdatedCount = 0;
     
-    ProgressBar progress(totalPlugins, "Scanning plugins");
+    ProgressBar progress(totalPlugins, LANG("plugin.scan.files"));
     
     for (int i = 0; i < totalPlugins; i++) {
         const Plugin& plugin = plugins[i];
@@ -419,17 +461,17 @@ void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
         if (!detectedVersion.empty() && detectedVersion != "unknown") {
             if (currentStored != detectedVersion) {
                 setStoredVersion(plugin.name, detectedVersion);
-                logger.debug("Updated " + plugin.name + " from filename: " + detectedVersion);
+                logger.debug(LANGF("plugin.version.api.updated_filename", plugin.name, detectedVersion));
                 updatedCount++;
             }
         } else {
             if (plugin.type != "manual") {
-                logger.debug("No filename version for " + plugin.name + ", checking API...");
+                logger.debug(LANGF("plugin.version.api.no_filename", plugin.name));
                 
                 PluginUpdateInfo apiInfo = checkPluginUpdate(plugin);
                 
                 if (!apiInfo.error.empty()) {
-                    logger.debug("API check failed for " + plugin.name + ": " + apiInfo.error);
+                    logger.debug(LANGF("plugin.version.api.failed", plugin.name, apiInfo.error));
                     continue;
                 }
                 
@@ -438,7 +480,7 @@ void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
                     
                     if (currentStored != apiInfo.version) {
                         setStoredVersion(plugin.name, apiInfo.version);
-                        logger.debug("Updated " + plugin.name + " from API: " + apiInfo.version);
+                        logger.debug(LANGF("plugin.version.api.updated_api", plugin.name, apiInfo.version));
                         apiUpdatedCount++;
                     }
                 }
@@ -446,19 +488,18 @@ void PluginManager::scanAndUpdateVersionsWithAPI(const string& pluginsPath) {
         }
     }
     
-    progress.finish("Scan complete. Updated " + to_string(updatedCount) + 
-                   " from filenames, " + to_string(apiUpdatedCount) + " from APIs.");
+    progress.finish(LANGF("plugin.version.api.updated_summary", to_string(updatedCount), to_string(apiUpdatedCount)));
 }
 
 void PluginManager::verifyVersionsWithAPI(const string& pluginsPath) {
-    logger.log("Verifying stored versions against installed files...");
+    logger.log(LANG("plugin.verify.run"));
     
     int totalPlugins = plugins.size();
     int verifiedCount = 0;
     int correctedCount = 0;
     int newerAvailableCount = 0;
     
-    ProgressBar progress(totalPlugins, "Verifying plugins");
+    ProgressBar progress(totalPlugins, LANG("plugin.verify.progress"));
     
     for (int i = 0; i < totalPlugins; i++) {
         const Plugin& plugin = plugins[i];
@@ -469,17 +510,16 @@ void PluginManager::verifyVersionsWithAPI(const string& pluginsPath) {
         string storedVersion = getStoredVersion(plugin.name);
         
         if (actualInstalledVersion.empty() || actualInstalledVersion == "unknown") {
-            logger.debug("Could not detect installed version for: " + plugin.name);
+            logger.debug(LANGF("plugin.scan.no_version", plugin.name));
             continue;
         }
         
         if (storedVersion == actualInstalledVersion) {
             verifiedCount++;
-            logger.debug("Verified " + plugin.name + " version: " + storedVersion);
+            logger.debug(LANGF("plugin.verify.verified", plugin.name, storedVersion));
         } else {
             setStoredVersion(plugin.name, actualInstalledVersion);
-            logger.debug("Corrected " + plugin.name + ": stored=" + storedVersion + 
-                        " → actual=" + actualInstalledVersion);
+            logger.debug(LANGF("plugin.verify.corrected", plugin.name, storedVersion, actualInstalledVersion));
             correctedCount++;
         }
         
@@ -488,7 +528,7 @@ void PluginManager::verifyVersionsWithAPI(const string& pluginsPath) {
             PluginUpdateInfo apiInfo = checkPluginUpdate(plugin);
             
             if (!apiInfo.error.empty()) {
-                logger.debug("API check failed for " + plugin.name + ": " + apiInfo.error);
+                logger.debug(LANGF("plugin.version.api.failed ", plugin.name, apiInfo.error));
                 continue;
             }
             
@@ -496,172 +536,131 @@ void PluginManager::verifyVersionsWithAPI(const string& pluginsPath) {
                 apiInfo.version != "spiget-latest" && apiInfo.version != "latest") {
                 
                 if (isNewerVersion(actualInstalledVersion, apiInfo.version)) {
-                    logger.debug("Update available for " + plugin.name + ": " + 
-                               actualInstalledVersion + " → " + apiInfo.version);
+                    logger.debug(LANGF("plugin.update.api_available ", plugin.name, actualInstalledVersion, apiInfo.version));
                     newerAvailableCount++;
                 }
             }
         }
     }
     
-    string summary = "Verified: " + to_string(verifiedCount) + 
-                    ", Corrected: " + to_string(correctedCount) + 
-                    ", Updates available: " + to_string(newerAvailableCount);
-    
-    progress.finish(summary);
-    
-    logger.success("Verification complete:");
-    logger.success("  • " + to_string(verifiedCount) + " versions verified correct");
-    logger.success("  • " + to_string(correctedCount) + " stored versions corrected");
-    logger.success("  • " + to_string(newerAvailableCount) + " plugins have updates available");
+    progress.finish(LANGF("plugin.verify.summary", to_string(verifiedCount), to_string(correctedCount), to_string(newerAvailableCount)));
+    logger.success(LANGF("plugin.verify.complete", to_string(verifiedCount), to_string(correctedCount), to_string(newerAvailableCount)));
 }
 
 string PluginManager::detectPluginVersion(const Plugin& plugin, const string& pluginsPath) {
-    logger.debug("Detecting version for plugin: " + plugin.name);
+    logger.debug(LANGF("plugin.version.detect.run", plugin.name));
     
-    // find the plugin file
-    string foundFile;
+    string foundFile = findMatchingPluginFile(plugin.name, pluginsPath);
+    
+    if (foundFile.empty()) {
+        logger.debug(LANGF("plugin.version.detect.no_match", plugin.name));
+        return "unknown";
+    }
+    
+    logger.debug(LANGF("plugin.version.detect.match", foundFile));
+    string version = extractVersionFromFilename(foundFile);
+    logger.debug(LANGF("plugin.version.detect.extract", version));
+    
+    return version;
+}
+
+string PluginManager::findMatchingPluginFile(const string& pluginName, const string& pluginsPath) {
+    vector<string> candidates = generatePluginNameVariants(pluginName);
     
     for (const auto& entry : directory_iterator(pluginsPath)) {
         string filename = entry.path().filename().string();
         
         if (!endsWith(filename, ".jar") || endsWith(filename, ".jar.DIS")) continue;
         
-        logger.debug("  Checking file: " + filename);
+        logger.debug(LANGF("plugin.find.check", filename));
         
-        string pluginNameLower = plugin.name;
-        transform(pluginNameLower.begin(), pluginNameLower.end(), pluginNameLower.begin(), ::tolower);
-        
-        string filenameLower = filename;
-        transform(filenameLower.begin(), filenameLower.end(), filenameLower.begin(), ::tolower);
-        
-        // try multiple matching strategies
-        bool matched = false;
-        
-        // strat 1: exact filename match
-        if (filenameLower == pluginNameLower + ".jar") {
-            matched = true;
-            logger.debug("    Matched using exact filename");
-        }
-
-        // strat 2: plugin name + hyphen
-        else if (!matched && filenameLower.find(pluginNameLower + "-") == 0) {
-            matched = true;
-            logger.debug("    Matched using hyphen start");
-        }
-
-        // strat 3: handle suffix removals
-        else if (!matched) {
-            string baseName = pluginNameLower;
-            
-            // remove common suffixes and try matching
-            vector<string> suffixes = {"-reloaded", "v3", "v2", "-spigot", "-bukkit", "-paper"};
-            
-            for (const string& suffix : suffixes) {
-                if (baseName.length() > suffix.length() && 
-                    baseName.substr(baseName.length() - suffix.length()) == suffix) {
-                    
-                    string nameWithoutSuffix = baseName.substr(0, baseName.length() - suffix.length());
-                    
-                    if (filenameLower == nameWithoutSuffix + ".jar" ||
-                        filenameLower.find(nameWithoutSuffix + "-") == 0) {
-                        matched = true;
-                        logger.debug("    Matched after removing suffix: " + suffix);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // strat 4: prevent false positives
-        if (matched) {
-            // ensure we don't match substrings of longer plugin names
-            string fileBase = filename.substr(0, filename.find_last_of('.'));
-            transform(fileBase.begin(), fileBase.end(), fileBase.begin(), ::tolower);
-            
-            // if plugin name is "vault" but file is "forgetfultrialvault", reject it
-            if (pluginNameLower.length() < fileBase.length()) {
-                string prefix = fileBase.substr(0, pluginNameLower.length());
-                if (prefix == pluginNameLower) {
-                    char nextChar = fileBase[pluginNameLower.length()];
-                    if (nextChar != '-' && nextChar != '.') {
-                        matched = false;
-                        logger.debug("    Rejected false positive match");
-                    }
-                }
-            }
-        }
-        
-        if (matched) {
-            foundFile = filename;
-            logger.debug("  Found matching file: " + foundFile);
-            break;
+        if (isPluginMatch(candidates, filename)) {
+            logger.debug(LANGF("plugin.find.match", filename));
+            return filename;
         }
     }
     
-    if (foundFile.empty()) {
-        logger.debug("  No matching file found for: " + plugin.name);
-        return "unknown";
-    }
-    
-    // extract version from filename
-    string version = extractVersionFromFilename(foundFile);
-    logger.debug("  Extracted version: " + version);
-    
-    return version;
+    return "";
 }
 
-/**
- * @deprecated
- * generateConfigFromPluginList
- * @brief function to generate a plugin config from the scanned plugins
- * @param pluginListFile string reference to the plugin list file
- */
-void PluginManager::generateConfigFromPluginList(const string& pluginListFile) {
-    ifstream file(pluginListFile);
-    if (!file.is_open()) {
-        logger.err(LANGF("error.file_not_found", pluginListFile));
-        return;
+vector<string> PluginManager::generatePluginNameVariants(const string& pluginName) {
+    string lower = pluginName;
+    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    
+    vector<string> variants = { lower };
+    
+    // handle specific known problem cases first
+    if (lower == "evenmorefish") variants.push_back("even-more-fish");
+    if (lower == "naruseapi") variants.push_back("naruseconfigapi");
+    if (lower == "secondthreadapi") variants.push_back("narusesecondthreadapi"); 
+    if (lower == "votifier") variants.push_back("nuvotifier");
+    
+    // case conversions
+    string hyphenated = "";
+    for (size_t i = 0; i < pluginName.length(); ++i) {
+        char current = pluginName[i];
+        
+        // add hyphen before uppercase letters (except first character)
+        if (i > 0 && isupper(current)) {
+            // look ahead to avoid breaking acronyms like "API"
+            bool isStartOfWord = true;
+            if (i + 1 < pluginName.length() && isupper(pluginName[i + 1])) {
+                isStartOfWord = false;
+            }
+            if (i > 0 && islower(pluginName[i - 1]) && isStartOfWord) {
+                hyphenated += "-";
+            }
+        }
+        hyphenated += tolower(current);
     }
     
-    plugins.clear();
-    string line;
-    int lineNum = 0;
+    if (hyphenated != lower && hyphenated.find("--") == string::npos) {
+        variants.push_back(hyphenated);
+    }
     
-    while (getline(file, line)) {
-        lineNum++;
-        
-        // skip empty lines and comments
-        if (line.empty() || line[0] == '#') continue;
-        
-        // remove any leading/trailing whitespace and special characters
-        line = regex_replace(line, regex("^[*\\s]+"), "");
-        line = regex_replace(line, regex("[,\\s]+$"), "");
-        
-        if (line.empty()) continue;
-        
-        Plugin plugin(line, guessPluginType(line));
-        plugin.filenamePattern = line + "*.jar";
-        
-        // check if it should be disabled on test
-        if (line.find("Discord") != string::npos || 
-            line.find("CMI") != string::npos ||
-            line.find("LiteBans") != string::npos) {
-            plugin.disableOnTest = true;
+    // remove common suffixes
+    vector<string> suffixes = {"-reloaded", "v3", "v2", "-spigot", "-bukkit", "-paper"};
+    for (const string& suffix : suffixes) {
+        if (lower.length() > suffix.length() && 
+            lower.substr(lower.length() - suffix.length()) == suffix) {
+            variants.push_back(lower.substr(0, lower.length() - suffix.length()));
+        }
+    }
+    
+    return variants;
+}
+
+bool PluginManager::isPluginMatch(const vector<string>& variants, const string& filename) {
+    string filenameLower = filename;
+    transform(filenameLower.begin(), filenameLower.end(), filenameLower.begin(), ::tolower);
+    
+    // remove jar extension
+    string baseName = filenameLower.substr(0, filenameLower.length() - 4);
+    
+    // actual matching strategies
+    for (const string& variant : variants) {
+        // exact match
+        if (baseName == variant) {
+            return true;
         }
         
-        plugins.push_back(plugin);
-        logger.log(LANGF("plugin.added_from_list", line, plugin.type));
+        // starts with variant followed by hyphen or version number
+        if (baseName.find(variant + "-") == 0) {
+            return true;
+        }
+        
+        // handle cases like "evenmorefish" matching "even-more-fish"
+        if (variant.length() >= 3 && baseName.find(variant) == 0) {
+            // make sure not a false positive
+            if (baseName.length() == variant.length() || 
+                baseName[variant.length()] == '-' || 
+                isdigit(baseName[variant.length()])) {
+                return true;
+            }
+        }
     }
     
-    file.close();
-    
-    logger.success(LANGF("plugin.list_processed", to_string(plugins.size()), pluginListFile));
-    
-    // save to json configuration
-    if (savePluginConfigs()) {
-        logger.success(LANG("plugin.config_generated"));
-    }
+    return false;
 }
 
 /**
@@ -675,35 +674,6 @@ void PluginManager::initPluginVersions() {
     }
 }
 
-string PluginManager::guessPluginType(const string& pluginName) {
-    // plugin mappings
-    map<string, string> knownPlugins = {};
-    /*
-    map<string, string> knownPlugins = {
-        {"EssentialsX", "spiget"},
-        {"WorldEdit", "github"}, 
-        {"ViaVersion", "spiget"},
-        {"PlaceholderAPI", "spiget"},
-        {"Vault", "spiget"},
-        {"ProtocolLib", "spiget"},
-        {"Citizens", "spiget"},
-        {"Axiom", "modrinth"},
-        {"CMI", "manual"},
-        {"DiscordSRV", "manual"},
-        {"LiteBans", "manual"}
-    };
-    */    
-
-    // check for exact or partial matches
-    for (const auto& known : knownPlugins) {
-        if (pluginName.find(known.first) != string::npos) {
-            return known.second;
-        }
-    }
-    
-    return "manual"; // default to manual if unknown
-}
-
 PluginUpdateInfo PluginManager::checkPluginUpdateSilent(const Plugin& plugin) {
     PluginUpdateInfo info;
     
@@ -714,10 +684,10 @@ PluginUpdateInfo PluginManager::checkPluginUpdateSilent(const Plugin& plugin) {
     } else if (plugin.type == "github") {
         info = checkGitHubAPI(plugin.resourceId);
     } else if (plugin.type == "manual") {
-        info.error = "Manual plugins require manual updates";
+        info.error = LANG("plugin.info.updates");
         return info;
     } else {
-        info.error = "Unknown plugin type: " + plugin.type;
+        info.error = LANGF("plugin.info.unknown", plugin.type);
         return info;
     }
     
@@ -793,6 +763,222 @@ bool PluginManager::savePluginConfigs(const string& configFile) {
     return true;
 }
 
+string PluginManager::guessPluginType(const string& pluginName) {
+    // check cache first
+    if (typeDetectionCache.find(pluginName) != typeDetectionCache.end()) {
+        logger.debug(LANGF("plugin.guess.check", pluginName, typeDetectionCache[pluginName]));
+        return typeDetectionCache[pluginName];
+    }
+    
+    logger.debug(LANGF("plugin.guess.detect.run", pluginName));
+    
+    // normalize plugin name for API calls
+    string normalized = pluginName;
+    transform(normalized.begin(), normalized.end(), normalized.begin(), ::tolower);
+    
+    // remove common suffixes that might interfere with API calls
+    vector<string> suffixes = {"-reloaded", "v3", "v2", "-spigot", "-bukkit", "-paper", "-plugin"};
+    for (const string& suffix : suffixes) {
+        if (normalized.length() > suffix.length() && 
+            normalized.substr(normalized.length() - suffix.length()) == suffix) {
+            normalized = normalized.substr(0, normalized.length() - suffix.length());
+            break;
+        }
+    }
+    
+    string detectedType = "manual"; // default
+    
+    // 1. try modrinth first (modern API, good search)
+    string modrinthType = tryModrinthDetection(normalized);
+    if (modrinthType != "unknown") {
+        logger.debug(LANG("plugin.guess.found.modrinth"));
+        detectedType = "modrinth";
+    }
+    // 2. try github (check common repo patterns)  
+    else {
+        string githubType = tryGitHubDetection(normalized);
+        if (githubType != "unknown") {
+            logger.debug(LANG("plugin.guess.found.github"));
+            detectedType = "github";
+        }
+        // 3. try spigot as last resort
+        else {
+            string spigotType = trySpigotDetection(normalized);
+            if (spigotType != "unknown") {
+                logger.debug(LANG("plugin.guess.found.spigot"));
+                detectedType = "spigot";
+            }
+        }
+    }
+    
+    if (detectedType == "manual") {
+        logger.debug(LANG("plugin.guess.no_found"));
+    }
+    
+    // cache the result
+    typeDetectionCache[pluginName] = detectedType;
+    saveTypeCache();
+    
+    return detectedType;
+}
+
+void PluginManager::loadTypeCache() {
+    string cacheFilePath = Utils::getDataPath(cacheFile);
+    
+    if (!exists(cacheFilePath)) return;
+    
+    ifstream file(cacheFilePath);
+    if (!file.is_open()) return;
+    
+    string line;
+    while (getline(file, line)) {
+        size_t colonPos = line.find(":");
+        if (colonPos != string::npos) {
+            string key = line.substr(0, colonPos);
+            string value = line.substr(colonPos + 1);
+            
+            // trim quotes
+            key = regex_replace(key, regex("[\"']"), "");
+            value = regex_replace(value, regex("[\"',]"), "");
+            
+            typeDetectionCache[key] = value;
+        }
+    }
+    
+    logger.debug(LANGF("plugin.cache.load", to_string(typeDetectionCache.size())));
+}
+
+void PluginManager::saveTypeCache() {
+    string cacheFilePath = Utils::getDataPath(cacheFile);
+    
+    ofstream file(cacheFilePath);
+    if (!file.is_open()) return;
+    
+    file << "{\n";
+    bool first = true;
+    for (const auto& pair : typeDetectionCache) {
+        if (!first) file << ",\n";
+        file << "  \"" << pair.first << "\": \"" << pair.second << "\"";
+        first = false;
+    }
+    file << "\n}\n";
+    
+    file.close();
+}
+
+string PluginManager::tryModrinthDetection(const string& pluginName) {
+    logger.debug(LANGF("plugin.guess.modrinth.run", pluginName));
+    
+    string baseName = pluginName;
+    transform(baseName.begin(), baseName.end(), baseName.begin(), ::tolower);
+    
+    // try common slug patterns
+    vector<string> slugVariants = {
+        baseName,
+        regex_replace(baseName, regex("[ _]"), "-"),
+        regex_replace(baseName, regex("([a-z])([A-Z])"), "$1-$2"),
+    };
+    
+    // common modrinth naming patterns
+    slugVariants.push_back(baseName + "-plugin");
+    slugVariants.push_back(baseName + "-mod");
+    
+    for (const string& slug : slugVariants) {
+        if (slug.empty()) continue;
+        
+        try {
+            logger.debug(LANGF("plugin.guess.modrinth.slug", slug));
+            PluginUpdateInfo info = checkModrinthAPI(slug, "1.21");
+            
+            // if we got a response without a 404 error, plugin exists
+            if (info.error.find("404") == string::npos && info.error.find("Not Found") == string::npos) {
+                if (!info.downloadUrl.empty() || !info.version.empty() || info.hasUpdate) {
+                    logger.debug(LANGF("plugin.guess.modrinth.success", slug));
+                    return "modrinth";
+                }
+            }
+        } catch (const exception& e) {
+            logger.debug(LANGF("api.call.failed", string(e.what())));
+            continue;
+        }
+    }
+    
+    return "unknown";
+}
+
+string PluginManager::tryGitHubDetection(const string& pluginName) {
+    logger.debug(LANGF("plugin.guess.github.run", pluginName));
+    
+    // patterns
+    vector<string> repoPatterns = {
+        pluginName + "/" + pluginName,                         // PluginName/PluginName
+        "minecraft-" + pluginName + "/" + pluginName,          // minecraft-PluginName/PluginName  
+        pluginName + "/minecraft-" + pluginName,               // PluginName/minecraft-PluginName
+        pluginName + "/" + pluginName + "-plugin",             // PluginName/PluginName-plugin
+        pluginName + "MC/" + pluginName,                       // PluginNameMC/PluginName
+        "MC" + pluginName + "/" + pluginName,                  // MCPluginName/PluginName
+    };
+    
+    // also try some popular minecraft plugin developers
+    vector<string> knownDevelopers = {"ViaVersion"};
+    for (const string& dev : knownDevelopers) {
+        repoPatterns.push_back(dev + "/" + pluginName);
+    }
+    
+    for (const string& repo : repoPatterns) {
+        if (repo.empty() || repo.find("/") == string::npos) continue;
+        
+        try {
+            logger.debug(LANGF("plugin.guess.github.repo", repo));
+            PluginUpdateInfo info = checkGitHubAPI(repo);
+            
+            // if we got a response without a 404 error, repo exists
+            if (info.error.find("404") == string::npos && info.error.find("Not Found") == string::npos) {
+                if (!info.downloadUrl.empty() || !info.version.empty() || info.hasUpdate) {
+                    logger.debug(LANGF("plugin.guess.github.repo", repo));
+                    return "github";
+                }
+            }
+        } catch (const exception& e) {
+            logger.debug(LANGF("api.call.failed", string(e.what())));
+            continue;
+        }
+    }
+    
+    return "unknown";
+}
+
+// @TODO: THIS ONES MORE DIFFICULT SO GOTTA THINK THONK ABOUT THIS
+string PluginManager::trySpigotDetection(const string& pluginName) {
+    logger.debug(LANGF("plugin.guess.spigot.run", pluginName));
+    
+    map<string, string> knownSpigotPlugins = {};
+    
+    string normalizedName = pluginName;
+    transform(normalizedName.begin(), normalizedName.end(), normalizedName.begin(), ::tolower);
+    
+    // check if we have a known resource ID
+    if (knownSpigotPlugins.find(normalizedName) != knownSpigotPlugins.end()) {
+        string resourceId = knownSpigotPlugins[normalizedName];
+        
+        try {
+            logger.debug(LANGF("plugin.guess.spigot.resourceid", resourceId));
+            PluginUpdateInfo info = checkSpigetAPI(resourceId);
+            
+            if (info.error.find("404") == string::npos && info.error.find("Not Found") == string::npos) {
+                if (!info.downloadUrl.empty() || !info.version.empty() || info.hasUpdate) {
+                    logger.debug(LANGF("plugin.guess.spigot.success", resourceId));
+                    return "spigot";
+                }
+            }
+        } catch (const exception& e) {
+            logger.debug(LANGF("api.call.failed", string(e.what())));
+        }
+    }
+    
+    return "unknown";
+}
+
 /**
  * getStoredVersion
  * @brief function to get the saved version of a given plugin
@@ -829,13 +1015,13 @@ PluginUpdateInfo PluginManager::checkSpigetAPI(const string& resourceId) {
     string url = "https://api.spiget.org/v2/resources/" + resourceId;
     map<string, string> headers = {
         {"Accept", "application/json"},
-        {"User-Agent", "Pluginator/1.0.3"}
+        {"User-Agent", "Pluginator"}
     };
     
     HttpResponse response = httpClient.get(url, headers);
     
     if (!response.success) {
-        info.error = "API request failed: " + response.error;
+        info.error = LANGF("api.spiget.req_failed", response.error);
         return info;
     }
     
@@ -873,7 +1059,7 @@ PluginUpdateInfo PluginManager::checkSpigetAPI(const string& resourceId) {
     }
     
     if (info.version.empty() || info.downloadUrl.empty()) {
-        info.error = "Could not extract version or download URL";
+        info.error = LANG("api.spiget.url_failed");
         return info;
     }
     
@@ -905,27 +1091,27 @@ PluginUpdateInfo PluginManager::checkModrinthAPI(const string& projectSlug, cons
             {"User-Agent", "Pluginator"}
         };
         
-        logger.debug("Modrinth API URL (" + loader + "): " + url);
+        logger.debug(LANGF("api.modrinth.url", loader, url));
         
         HttpResponse response = httpClient.get(url, headers);
 
         if (!response.success) {
-            logger.debug("Loader " + loader + " failed: " + response.error);
+            logger.debug(LANGF("api.modrinth.loader_failed", loader, response.error));
             if (loader == loaderPriority.back()) {
-                info.error = "All API requests failed: " + response.error;
+                info.error = LANGF("api.modrinth.all_failed", response.error);
                 return info;
             }
             continue; // try next loader
         }
 
         if (response.body.empty()) {
-            logger.debug("Empty response for loader: " + loader);
+            logger.debug(LANGF("api.modrinth.loader_empty", loader));
             continue;
         }
         
         // found a version with this loader - parse and return
-        logger.debug("Found version with loader: " + loader);
-        logger.debug("Modrinth Response: " + response.body.substr(0, 500));
+        logger.debug(LANGF("api.modrinth.loader_found", loader));
+        logger.debug(LANGF("api.modrinth.res", response.body.substr(0, 500)));
         
         // extract version info
         string versionPattern = "\"version_number\"\\s*:\\s*\"([^\"]+)\"";
@@ -952,13 +1138,13 @@ PluginUpdateInfo PluginManager::checkModrinthAPI(const string& projectSlug, cons
         
         if (!info.version.empty() && !info.downloadUrl.empty()) {
             info.hasUpdate = true;
-            logger.debug("Successfully found version " + info.version + " for loader: " + loader);
+            logger.debug(LANGF("api.modrinth.version_found", info.version, loader));
             return info;
         }
     }
     
     // no compatible versions found for any loader
-    info.error = "No versions found for MC " + mcVersion + " with compatible loaders";
+    info.error = LANGF("api.modrinth.version_failed", mcVersion);
     return info;
 }
 
@@ -980,7 +1166,7 @@ PluginUpdateInfo PluginManager::checkGitHubAPI(const string& repo) {
     HttpResponse response = httpClient.get(url, headers);
     
     if (!response.success) {
-        info.error = "GitHub API request failed: " + response.error;
+        info.error = LANGF("api.github.req_failed", response.error);
         return info;
     }
     
@@ -1006,12 +1192,12 @@ PluginUpdateInfo PluginManager::checkGitHubAPI(const string& repo) {
     }
     
     if (info.version.empty()) {
-        info.error = "Could not find version in GitHub release";
+        info.error = LANG("api.github.no_version");
         return info;
     }
     
     if (info.downloadUrl.empty()) {
-        info.error = "Could not find .jar download in GitHub release";
+        info.error = LANG("api.github.no_jar");
         return info;
     }
     
@@ -1037,7 +1223,7 @@ PluginUpdateInfo PluginManager::checkJenkinsAPI(const string& jenkinsType, const
         // for custom jenkins instances, job should contain full url
         baseUrl = "";
     } else {
-        info.error = "Unknown Jenkins type: " + jenkinsType;
+        info.error = LANGF("api.jenkins.type_unknown", jenkinsType);
         return info;
     }
     
@@ -1053,21 +1239,21 @@ PluginUpdateInfo PluginManager::checkJenkinsAPI(const string& jenkinsType, const
         {"User-Agent", "Pluginator"}
     };
     
-    logger.debug("Jenkins API URL: " + url);
+    logger.debug(LANGF("api.jenkins.url", url));
     
     HttpResponse response = httpClient.get(url, headers);
     
     if (!response.success) {
-        info.error = "Jenkins API request failed: " + response.error;
+        info.error = LANGF("api.jenkins.req_failed", response.error);
         return info;
     }
     
-    logger.debug("Jenkins Response: " + response.body.substr(0, 500));
+    logger.debug(LANGF("api.jenkins.res", response.body.substr(0, 500)));
     
     // extract build number as version
     string buildNumber = JsonHelper::extractValue(response.body, "number");
     if (buildNumber.empty()) {
-        info.error = "Could not extract build number from Jenkins response";
+        info.error = LANG("api.jenkins.extract_failed");
         return info;
     }
     
@@ -1090,7 +1276,7 @@ PluginUpdateInfo PluginManager::checkJenkinsAPI(const string& jenkinsType, const
     }
     
     if (jarFileName.empty()) {
-        info.error = "No .jar artifacts found in Jenkins build";
+        info.error = LANG("api.jenkins.no_jar");
         return info;
     }
     
@@ -1102,7 +1288,7 @@ PluginUpdateInfo PluginManager::checkJenkinsAPI(const string& jenkinsType, const
             string buildUrl = url.substr(0, apiPos);
             info.downloadUrl = buildUrl + "/artifact/" + relativePath;
         } else {
-            info.error = "Could not construct download URL for custom Jenkins";
+            info.error = LANG("api.jenkins.url_failed");
             return info;
         }
     } else {
@@ -1111,10 +1297,7 @@ PluginUpdateInfo PluginManager::checkJenkinsAPI(const string& jenkinsType, const
     
     info.filename = jarFileName;
     info.hasUpdate = true;
-    
-    logger.debug("Jenkins version: " + info.version);
-    logger.debug("Jenkins download URL: " + info.downloadUrl);
-    
+    logger.debug(LANGF("api.jenkins.summary", info.version, info.downloadUrl));
     return info;
 }
 
@@ -1181,10 +1364,10 @@ PluginUpdateInfo PluginManager::checkPluginUpdate(const Plugin& plugin) {
     } else if (plugin.type == "jenkins") {
         info = checkJenkinsAPI(plugin.jType, plugin.job);
     } else if (plugin.type == "manual") {
-        info.error = "Manual plugins require manual updates";
+        info.error = LANG("plugin.info.updates");
         return info;
     } else {
-        info.error = "Unknown plugin type: " + plugin.type;
+        info.error = LANGF("plugin.info.unknown", plugin.type);
         return info;
     }
     
@@ -1225,9 +1408,7 @@ bool PluginManager::downloadPlugin(const PluginUpdateInfo& updateInfo, const str
             size_t fileSize = file.tellg();
             file.close();
             
-            logger.success(LANGF("plugin.download_success_with_size", 
-                                updateInfo.filename, 
-                                Utils::formatBytes((int64_t)fileSize)));
+            logger.success(LANGF("plugin.download_success_with_size", updateInfo.filename, Utils::formatBytes((int64_t)fileSize)));
         } else {
             logger.success(LANGF("plugin.download_success", updateInfo.filename));
         }
@@ -1287,7 +1468,7 @@ void PluginManager::checkAllPluginUpdates(const vector<Plugin>& plugins, bool do
 }
 
 void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
-    cout << endl << Colors::BLUE << "Plugin Status Report:" << Colors::NC << endl;
+    cout << endl << Colors::BLUE << LANG("plugin.status.title") << Colors::NC << endl;
     cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" << endl;
     
     string testPluginsPath = Config::getInstance().getTestServerPath() + "/plugins";
@@ -1304,7 +1485,7 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
     vector<PluginStatus> results;
     results.reserve(totalPlugins);
     
-    ProgressBar progress(totalPlugins, "Checking plugins");
+    ProgressBar progress(totalPlugins, "Checking Plugins");
     
     // check each plugin once and store results
     for (int i = 0; i < totalPlugins; i++) {
@@ -1320,17 +1501,7 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
         status.latestVersion = "N/A";
         
         // check if plugin exists
-        bool pluginExists = false;
-        if (exists(testPluginsPath)) {
-            for (const auto& entry : directory_iterator(testPluginsPath)) {
-                string filename = entry.path().filename().string();
-                if (filename.find(plugin.name.substr(0, min(5, (int)plugin.name.length()))) != string::npos &&
-                    endsWith(filename, ".jar") && !endsWith(filename, ".jar.DIS")) {
-                    pluginExists = true;
-                    break;
-                }
-            }
-        }
+        bool pluginExists = !findMatchingPluginFile(plugin.name, testPluginsPath).empty();
         
         if (pluginExists) {
             if (status.currentVersion != "unknown") {
@@ -1344,7 +1515,7 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
                         status.latestVersion = updateInfo.version;
                         if (updateInfo.hasUpdate) {
                             status.statusColor = Colors::YELLOW;
-                            status.statusText = "Update Avail";
+                            status.statusText = "Update Available";
                         }
                     } else {
                         status.latestVersion = "API Error";
@@ -1418,11 +1589,11 @@ void PluginManager::showPluginStatus(const vector<Plugin>& plugins) {
     
     // count from already-stored results
     for (const PluginStatus& status : results) {
-        if (status.statusText == "Installed" || status.statusText == "Update Avail") {
+        if (status.statusText == "Installed" || status.statusText == "Update Available") {
             installedCount++;
         }
         
-        if (status.statusText == "Update Avail") {
+        if (status.statusText == "Update Available") {
             updateAvailableCount++;
         }
     }

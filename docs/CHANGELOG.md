@@ -1,3 +1,24 @@
+# Dev Update v1.2.1
+- Reverted lang json to fully flat instead of having nested objects.
+- Added boolean parse function in JsonHelper.
+- Finally fixed all issues for detecting whether a plugin needs to be disabled or not (using the boolean parse function).
+- Added more colors to Colors class.
+- Changed progress bar colors.
+- Added progress bar to the tar command when backing up files.
+- Fixed plugins not getting re-disabled after migration command.
+- Added INFO logger for sections with custom emojis n shit.
+
+# Dev Update v1.2.0
+- Fixed plugin-status command logic (had old unuseful code that didn't do the checks correctly).
+- ^ Also added more functions for plugin matching.
+- Fixed file paths not working in my development environment.
+- Fixed function that handles disabling plugins for the test server.
+- Added handling for log file sizes.
+- Improved logic for loading lang strings from json file.
+- Added validation functions to Lang class.
+- DEEP cleaned lang inconsistencies or hard-coded strings throughout the entire project.
+- Attempted to add a function to parse nested json objects (it doesn't fully work).
+
 # Dev Update v1.1.11
 - Hotfix for lang problems and path problems.
 - Idk what I was smoking when I started this project, but the generateConfigFromPluginList function in plugin_manager has gotta go (because it literally serves no purpose).
