@@ -1,3 +1,7 @@
+# Dev Update v1.2.2
+- Hotfix for segmentation error on production machine.
+- ^ (updated Utils::getInstallDirectory)
+
 # Dev Update v1.2.1
 - Reverted lang json to fully flat instead of having nested objects.
 - Added boolean parse function in JsonHelper.

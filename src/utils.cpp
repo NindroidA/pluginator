@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iomanip>
 #include <filesystem>
+#include <string>
 
 using namespace filesystem;
 using namespace std;
@@ -73,22 +74,59 @@ namespace Utils {
     }
 
     string getInstallDirectory() {
-        try {
-            auto binaryPath = canonical("/proc/self/exe");
-            auto installDir = binaryPath.parent_path().parent_path();
-            
-            // debug output
-            cout << LANGF("utils.debug_bin", binaryPath) << endl;
-            cout << LANGF("utils.debug_dir", installDir) << endl;
-            
-            return installDir.string();
-        } catch (const exception& e) {
-            if (exists("./src") && exists("./include")) {
-                return current_path().string();
-            }
-            // final fallback
-            return "/opt/pluginator";
+        // check current working directory first (for development)
+        filesystem::path workingDir = filesystem::current_path();
+        
+        // check if current working directory is the project root
+        if (filesystem::exists(workingDir / "CMakeLists.txt") && 
+            filesystem::exists(workingDir / "include") &&
+            filesystem::exists(workingDir / "src")) {
+            return workingDir.string();
         }
+        
+        // check if we're running from build directory (go up one level)
+        if (workingDir.filename() == "build") {
+            filesystem::path parentDir = workingDir.parent_path();
+            if (filesystem::exists(parentDir / "CMakeLists.txt") && 
+                filesystem::exists(parentDir / "include") &&
+                filesystem::exists(parentDir / "src")) {
+                return parentDir.string();
+            }
+        }
+        
+        // production: check if running from /usr/local/bin
+        char* exePath = realpath("/proc/self/exe", nullptr);
+        if (exePath != nullptr) {
+            string fullPath(exePath);
+            free(exePath);
+            
+            size_t lastSlash = fullPath.find_last_of('/');
+            if (lastSlash != string::npos) {
+                string binDir = fullPath.substr(0, lastSlash);
+                
+                // /usr/local/bin/pluginator -> /opt/pluginator
+                if (binDir == "/usr/local/bin") {
+                    return "/opt/pluginator";
+                }
+                
+                // walk up from executable path looking for project markers
+                filesystem::path currentPath(binDir);
+                for (int i = 0; i < 5; i++) {
+                    if (filesystem::exists(currentPath / "CMakeLists.txt") && 
+                        filesystem::exists(currentPath / "include") &&
+                        filesystem::exists(currentPath / "src")) {
+                        return currentPath.string();
+                    }
+                    
+                    filesystem::path parentPath = currentPath.parent_path();
+                    if (parentPath == currentPath) break;  // reached root
+                    currentPath = parentPath;
+                }
+            }
+        }
+        
+        // final fallback
+        return "/opt/pluginator";
     }
     
     string getConfigPath(const string& filename) {

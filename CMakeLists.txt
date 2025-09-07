@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(Pluginator VERSION 1.2.1)
+project(Pluginator VERSION 1.2.2)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
