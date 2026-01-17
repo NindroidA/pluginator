@@ -1,0 +1,20 @@
+title: ""
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## General Discussion
+        For anything that doesn't fit in the other categories!
+
+        - **Questions?** Use the Q&A category
+        - **Feature ideas?** Use the Ideas category
+        - **Bug reports?** Use [Issues](https://github.com/NindroidA/pluginator/issues/new?template=bug_report.md)
+
+  - type: textarea
+    id: discussion
+    attributes:
+      label: What's on your mind?
+      description: Start the conversation
+    validations:
+      required: true

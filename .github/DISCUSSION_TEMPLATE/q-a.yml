@@ -1,0 +1,33 @@
+title: "[Q&A] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Question
+        Have a question about Pluginator? Ask away!
+
+        Before asking, please:
+        - Check the [User Guide](https://github.com/NindroidA/pluginator/blob/main/docs/USER_GUIDE.md)
+        - Search [existing discussions](https://github.com/NindroidA/pluginator/discussions)
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: How do I...?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Any additional context that might help answer your question
+      placeholder: |
+        - What are you trying to achieve?
+        - What have you already tried?
+        - Pluginator version, OS, etc.
+    validations:
+      required: false
