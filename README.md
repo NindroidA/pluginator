@@ -1,12 +1,10 @@
 # Pluginator
 
-[![Built with Bun](https://img.shields.io/badge/Built%20with-Bun-f9f1e1?logo=bun&logoColor=f9f1e1&labelColor=14151a)](https://bun.sh)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/Ink-React%20CLI-61dafb?logo=react&logoColor=white)](https://github.com/vadimdemedes/ink)
-[![License](https://img.shields.io/badge/License-Proprietary-red)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)]()
-
-> Minecraft server plugin manager with multi-source update checking and downloading
+<a href="https://bun.sh" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Built%20with-Bun-f9f1e1?logo=bun&logoColor=f9f1e1&labelColor=14151a" alt="Built with Bun"></a>
+<a href="https://www.typescriptlang.org/" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/TypeScript-5.0-3178c6?logo=typescript&logoColor=white" alt="TypeScript"></a>
+<a href="https://github.com/vadimdemedes/ink" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Ink-React%20CLI-61dafb?logo=react&logoColor=white" alt="Ink React CLI"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-Proprietary-red" alt="License"></a>
+<img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue" alt="Platform">
 
 Pluginator is a powerful CLI tool for managing Minecraft server plugins. It supports multiple plugin sources, production/test server synchronization, and automated backups.
 
