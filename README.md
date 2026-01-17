@@ -83,6 +83,10 @@ pluginator sync                 # Sync prod to test
 | `?` | Show help |
 | `Ctrl+C` (2x) | Quit |
 
+## Development
+
+This project's development has been accelerated through the use of AI-assisted development tools, including GitHub Copilot, Claude Code, and other AI programming assistants. These tools have enhanced productivity while maintaining code quality and best practices. All AI-generated code has been reviewed, tested, and refined to ensure reliability.
+
 ## Support
 
 - **Bug Reports:** [Open an issue](https://github.com/NindroidA/pluginator/issues/new?template=bug_report.md)
@@ -91,6 +95,6 @@ pluginator sync                 # Sync prod to test
 
 ## License
 
-Copyright (c) 2026 Andrew Curtis (NindroidA). All Rights Reserved.
+Copyright (c) 2026 Nindroid Systems (Andrew Curtis - NindroidA). All Rights Reserved.
 
 This is proprietary software. See [LICENSE](LICENSE) for details.
