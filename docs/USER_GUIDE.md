@@ -22,7 +22,15 @@ Complete guide to using Pluginator for Minecraft server plugin management.
 
 ### Prerequisites
 
-Download the appropriate binary for your platform from the [Releases page](https://github.com/NindroidA/pluginator/releases).
+1. Install [Bun](https://bun.sh):
+   ```bash
+   curl -fsSL https://bun.sh/install | bash
+   ```
+
+2. Install Pluginator:
+   ```bash
+   bun install -g pluginator
+   ```
 
 ### Initial Setup
 
@@ -482,59 +490,28 @@ cp -r /path/to/restore/* /your/server/plugins/
 
 ## Theming
 
-### Built-in Themes
+Pluginator includes four built-in color themes:
 
-- `default` - Purple/violet tones
-- `ocean` - Blue/cyan tones
-- `forest` - Green/emerald tones
-- `sunset` - Orange/amber tones
+| Theme | Description |
+|-------|-------------|
+| `default` | Purple/violet tones |
+| `ocean` | Blue/cyan tones |
+| `forest` | Green/emerald tones |
+| `sunset` | Orange/amber tones |
 
-### Using a Theme
+### Selecting a Theme
 
 ```bash
 # Via command line
 pluginator --theme ocean
 
-# Via config file
-# Add to pluginator.config:
-THEME=ocean
-```
-
-### Custom Theme
-
-Create `config/theme.json`:
-
-```json
+# Via config file (~/.pluginator/config.json)
 {
-  "extends": "default",
-  "colors": {
-    "primary": "#FF6B6B",
-    "secondary": "#4ECDC4",
-    "success": "#2ECC71",
-    "warning": "#F39C12",
-    "error": "#E74C3C",
-    "info": "#3498DB"
-  }
+  "theme": "ocean"
 }
 ```
 
-### Available Colors
-
-| Property | Description |
-|----------|-------------|
-| `primary` | Main accent color |
-| `secondary` | Secondary accent |
-| `success` | Success messages |
-| `warning` | Warning messages |
-| `error` | Error messages |
-| `info` | Info messages |
-| `text` | Primary text |
-| `textSecondary` | Secondary text |
-| `textMuted` | Muted/dimmed text |
-| `background` | Background color |
-| `surface` | Card/panel backgrounds |
-| `border` | Border colors |
-| `selection` | Selected item highlight |
+Themes are bundled presets designed for optimal readability. Custom themes are not supported to ensure consistent UI behavior across updates.
 
 ## Troubleshooting
 
@@ -575,13 +552,53 @@ Debug logs include:
 - API requests and responses
 - Version comparison details
 - File operations
-- Input validation (v1.4.0) - Accepted/rejected inputs with reasons
-- State transitions (v1.4.0) - UI state changes with triggers
-- Throttled operations (v1.4.0) - Rate-limited action attempts
+- **Input validation** (v1.4.0) - Accepted/rejected inputs with reasons
+- **State transitions** (v1.4.0) - UI state changes with triggers
+- **Throttled operations** (v1.4.0) - Rate-limited action attempts
+
+**Input Validation Logging:**
+
+When debug mode is enabled, all keyboard inputs are validated against the current UI state and logged:
+
+```json
+{
+  "level": "debug",
+  "message": "Input rejected: 's' in progress state",
+  "timestamp": "2025-01-16T10:30:45.123Z",
+  "context": {
+    "key": "s",
+    "state": "progress",
+    "valid": false,
+    "reason": "operation in progress"
+  }
+}
+```
+
+**State Transition Logging:**
+
+UI state changes are tracked with triggers:
+
+```json
+{
+  "level": "info",
+  "message": "UI state transition: idle → command-palette",
+  "timestamp": "2025-01-16T10:30:45.456Z",
+  "context": {
+    "from": "idle",
+    "to": "command-palette",
+    "trigger": "/ or :"
+  }
+}
+```
+
+This helps diagnose:
+- Why certain keys aren't working (wrong state)
+- Unexpected state transitions
+- Race conditions with async operations
 
 ### Getting Help
 
-1. Check the [FAQ](https://github.com/NindroidA/pluginator/discussions)
+1. Check the [FAQ](https://github.com/NindroidA/pluginator/wiki/FAQ)
 2. Search [existing issues](https://github.com/NindroidA/pluginator/issues)
 3. Open a new issue with debug logs
 
