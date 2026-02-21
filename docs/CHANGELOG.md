@@ -7,6 +7,252 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.10] - 2026-02-21
+
+### Added
+- **Numbered Error Codes**: All errors now display a unique `PLG-NNNN` identifier (e.g., `[PLG-1001] Request timed out`)
+  - Category-based numbering for easy lookup: network (1xxx), validation (2xxx), filesystem (3xxx), source (4xxx), auth (5xxx), config (6xxx), workflow (7xxx), security (8xxx)
+- **Developer Partnership Form**: Plugin developers can request integration with Pluginator through GitHub Issues
+
+---
+
+## [2.2.9] - 2026-02-21
+
+### Added
+- **Build pipeline**: Added missing build script for CI/CD
+
+### Fixed
+- **CI pipeline**: Resolved all lint, TypeScript, and test errors
+- **Bundled data**: Default configuration files now properly included in builds
+- **Theme marketplace**: Fixed theme loading and display
+- **Health dashboard**: Fixed scrolling issues in the health view
+
+---
+
+## [2.2.5-2.2.8] - 2026-02-20
+
+### Added
+- **CLI `--no-ui` flag**: Skip interactive TUI for scripting and CI use
+- **Stats view refresh**: Press `r` to refresh stats on the Stats tab
+- **Health view controls**: Press `r` to refresh health, `Enter` to view plugin details
+- **Recommendations legend**: Symbol legend bar showing type icons
+- **Uninstall command**: `/uninstall` available in command palette
+- **Command palette tier filtering**: Commands hidden if user lacks the required tier
+- **Tab tier gating**: Stats, Health, Recommendations, and Performance tabs require Plus/Pro tier
+
+### Changed
+- BETA badge color changed to orange to match web app
+- Home tab shortcuts removed — use command palette instead
+- Server scan runs automatically after setup wizard completes
+
+### Fixed
+- First-run flow no longer asks user to edit JSON files — setup wizard handles it directly
+
+## [2.2.4] - 2026-02-20
+
+### Added
+- **Registry API Integration**: Plugin registry loads from NinSys API with bundled fallback
+- **Theme Gallery API**: Theme marketplace loads from live API with offline fallback
+- **Uninstall support**: `pluginator uninstall` command with `--keep-data` option
+
+### Changed
+- All API calls hardened with timeouts and dynamic User-Agent headers
+- Registry expanded to 101 curated plugins
+
+## [2.2.0] - 2026-02-07
+
+### Added
+- **Auto-Source Assignment**: Scanned plugins automatically matched to the curated registry
+  - First-run assigns all plugins; subsequent scans assign only new ones
+  - Manual overrides are never overwritten
+- **Plugin Source Editor**: View and edit plugin source configuration with `/plugin-edit` command
+  - Press `e` or `Enter` in Plugins tab to open editor
+
+## [2.1.0-2.1.3] - 2026-02-07
+
+### Added
+- **In-CLI Config Editor**: `/config-edit` command for editing configuration interactively
+- **In-CLI Source Editor**: `/source-edit` command for editing custom sources
+- **Setup Wizard Enhancements**: Path validation, cached paths, new steps for features and notifications
+- **Beta Indicator**: BETA badge displayed in the header
+- **Plugin Registry**: Expanded from 41 to 101 curated plugins
+
+### Fixed
+- Health dashboard items disappearing when scrolling
+- Command palette always running top result instead of selected command
+- Global key conflicts between Home tab and other tabs
+- Server JAR default changed to test server (safer workflow)
+- Various UI layout and navigation fixes
+
+## [2.0.0-2.0.1] - 2026-02-03
+
+### First Public Release
+
+This release marks the first public version of Pluginator.
+
+### Security
+- SSRF prevention on all HTTP requests and panel URLs
+- Command sanitization for server panel integrations
+- Strict checksum verification for downloads (corrupted files automatically deleted)
+- Dependency updates for known vulnerabilities
+
+### Added
+- **OAuth cancellation**: Press Escape to cancel OAuth login
+- **GitHub rate limiting**: Proactive backoff when approaching API rate limits
+- **Gradient progress bars**: Visual gradient pattern for all tiers
+
+### Fixed
+- Fixed broken NinSys API calls
+- Force quit (Ctrl+C) now works during setup wizard
+- Fixed 4 critical UI crashes during normal interaction
+- Fixed virtual list rendering glitch across multiple views
+- Backup now shows proper error for empty directories
+
+## [1.71.0] - 2026-02-02
+
+### Added
+- **New Tabs**: Health (7), Recommendations (8), Performance (9) in main navigation
+- **Plugin Health Dashboard**: Health scoring and issue detection
+- **Smart Recommendations**: Plugin recommendations with filtering
+- **Performance Dashboard**: Server performance analytics with charts
+- **Conflict Detection Modal**: Detect and resolve plugin conflicts
+- **New commands**: `/health`, `/recs`, `/perf`, `/conflicts`
+
+## [1.70.0-1.70.6] - 2026-02-02
+
+### Added
+- **Server Performance Analytics**: Complete server monitoring system
+  - TPS/MSPT sparkline graphs, memory and CPU visualization
+  - Plugin performance rankings and optimization recommendations
+  - Alert monitoring for low TPS, memory pressure, and high MSPT
+  - Performance baselines for before/after comparison
+- **Server Panel Integrations**: Connect to AMP, Pterodactyl, Crafty Controller, and MCSManager
+  - Server status, metrics, console access, and power control
+
+## [1.69.0-1.69.5] - 2026-02-02
+
+### Added
+- **Plugin Configuration Templates**: Create, share, and apply server configurations
+  - Template engine with variables, conditionals, and loops
+  - Create templates from existing config files with auto-detected variables
+  - Preview and conflict detection before applying
+  - Template library with favorites, collections, and history
+  - Template marketplace for community sharing
+  - Sync templates across multiple servers with drift detection
+
+## [1.66.0-1.66.5] - 2026-02-02
+
+### Added
+- **Smart Plugin Recommendations**: Intelligent recommendation engine
+  - Similar plugins, missing dependencies, popular, and trending suggestions
+  - Plugin comparison tool with side-by-side stats and migration guides
+  - Personalized discovery feed (New, Trending, Staff Picks, For You)
+  - Community reviews and ratings aggregated from multiple sources
+  - Save plugins to a wishlist for later
+
+## [1.65.0] - 2026-02-02
+
+### Added
+- **Theme Marketplace**: Browse and install community themes with `/themes` command
+  - Search, filter, and install themes from the marketplace
+  - Max tier required for marketplace access
+
+## [1.64.0] - 2026-02-02
+
+### Added
+- **Widget Dashboard**: Customizable dashboard with `/dashboard` command
+  - Plugin summary, server status, updates, and quick actions widgets
+  - Analytics, health, and live log streaming widgets
+  - Layout editor for Plus tier users
+
+## [1.61.0] - 2026-02-02
+
+### Added
+- **Data Management**: Export, import, preview, and backup scheduling
+  - `/export` and `/import` commands for configuration sharing
+  - `/preview` command for dry-run sync operations
+  - `/backups` command for automatic backup scheduling
+
+## [1.60.0] - 2026-02-02
+
+### Added
+- **Plugin Organization**: Tags, groups, and profiles
+  - Press `t` to manage tags, `g` to manage groups
+  - `/tags`, `/groups`, `/profiles` commands
+  - Tier-gated: Tags (Free/Plus), Groups (Plus), Profiles (Pro)
+
+## [1.59.0] - 2026-02-02
+
+### Added
+- **Favorites**: Mark plugins as favorites with `f` key, filter with `/favorites`
+- **Stats View**: Plugin statistics via `/stats` command or tab 6
+- **Accessibility Settings**: Sticky keys, slow keys, and visual feedback (Max tier)
+- **Jump List Navigation**: Vim-style `Ctrl+O`/`Ctrl+I` to navigate view history
+
+## [1.58.0-1.58.5] - 2026-02-01
+
+### Added
+- **Vim Mode**: Vim-style navigation and editing for premium users
+  - Normal, insert, visual, and command modes
+  - Forward/backward search with smart case
+  - Marks system with jump list
+- **Chord Keybindings**: Multi-key sequences with leader key (Space)
+- **Macro Recording**: Record and playback keyboard macros with speed control
+- **Custom Keybindings**: Configurable key bindings with presets (Default, Vim, Emacs, Minimal)
+- **Quick Actions & Jump Lists**: Fuzzy finder and bookmark system
+- **Accessibility Modes**: Sticky keys, slow keys, key repeat control, single-hand mode
+
+## [1.55.0-1.55.3] - 2026-02-01
+
+### Added
+- **Premium ASCII Branding**: ASCII art banners and animated startup for paid tiers
+- **View Transitions**: Smooth animated transitions between views (Pro/Max)
+- **Premium Progress Bars**: Animated progress indicators with ETA display
+- **Ambient Visual Effects**: Breathing animations, sparkles, and celebrations (Max tier)
+
+## [1.54.0] - 2026-02-01
+
+### Added
+- **Plugin Registry Browser**: Browse the curated plugin catalog with `/registry` command
+  - Search, category filtering, and plugin details
+  - Download plugins directly from the registry
+  - Quick filters: Popular (`p`), Verified (`v`), Installed (`n`)
+
+### Fixed
+- False "update available" for build number suffixes (e.g., `1.7.3-b131` is treated as `1.7.3`)
+- Download failures now correctly show warning indicators
+- Update results persist across app restarts
+
+## [1.53.0] - 2026-01-31
+
+### Added
+- **Snapshot Management**: Selection dialog for restoring snapshots
+  - Rename snapshots with `/snapshot:rename` command
+  - Validation and corruption detection for snapshot archives
+
+## [1.52.0-1.52.5] - 2026-01-30
+
+### Added
+- **Premium Gradient Text**: Animated gradient text for paid tier users across the UI
+- **Schedule System**: Automated update execution with time windows
+  - Background daemon with `/schedule:start`, `/schedule:stop`, `/schedule:status` commands
+  - Auto-backup before updates with retention policy
+  - Notifications via terminal, desktop, and webhooks (Discord/Slack)
+  - Per-plugin schedule overrides and blackout dates
+
+### Security
+- SSRF validation on redirects, IPv6 blocking, web manifest URL validation
+
+### Fixed
+- Various data safety, accessibility, and type safety improvements
+
+## [1.50.0] - 2026-01-29
+
+### Added
+- **Improved Plugin Data Management**: Better caching and preferences system
+  - Plugin preferences persist between sessions
+  - Scan results cached for faster startup
+
 ## [1.48.0] - 2026-01-26
 
 ### Added
@@ -18,447 +264,141 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Major version detection with optional skipping
   - Queue persistence and history tracking
 
-## [1.41.4] - 2026-01-25
+## [1.41.0-1.41.4] - 2026-01-25
 
 ### Added
 - **Conflict Detection**: Detect and resolve sync conflicts before syncing
   - Identify conflicts: newer files on target, different content, config files, size mismatches
   - Resolution options: skip, overwrite, rename, or backup-then-overwrite
-- **Test Scenario Runner**: Execute predefined test scenarios from dev CLI
-  - Navigation and workflow test scenarios
-  - Step-through debugging with assertions
-
-## [1.41.3] - 2026-01-25
-
-### Added
 - **Dry Run Mode**: Preview sync changes before executing
-  - Shows files to copy, update, delete, disable, enable, or skip
-  - Displays total bytes to transfer and disk space required
-
-## [1.41.2] - 2026-01-25
-
-### Added
 - **Backup Verification**: Checksum-based backup integrity verification
-  - Generate manifests with file checksums
-  - Verify backups against manifests
-  - Quick integrity checks using total checksum
+- **Atomic Sync**: Two-phase commit with staging, verification, and automatic rollback
+- **Enhanced Caching**: Cache warming, preloading, and memory pressure monitoring
 
-## [1.41.1] - 2026-01-25
-
-### Added
-- **Atomic Sync**: Two-phase commit pattern for robust sync operations
-  - Stage files before committing
-  - Verify staging integrity before applying
-  - Automatic rollback on failure
-- **Enhanced Caching**: Advanced caching with cache warming, preloading, and memory pressure monitoring
-- **Session Playback**: Playback recorded dev sessions with speed control
-
-## [1.41.0] - 2026-01-25
-
-### Changed
-- Improved test coverage across logging, version comparison, and update checking modules
-
-## [1.40.0] - 2026-01-25
+## [1.34.0-1.40.0] - 2026-01-25
 
 ### Added
-- **Consolidated App State**: Improved UI state management
-- **HTTP Circuit Breaker**: Prevent cascading failures in network requests
-  - Automatic blocking when too many failures occur
-  - Per-host tracking for independent failure handling
+- **Standardized Error Handling**: Typed errors with user-friendly messages (Network, Validation, Filesystem, Source, Auth, Config, Workflow, Security)
+- **HTTP Circuit Breaker**: Prevents cascading network failures with per-host tracking
+- **Per-File Sync Progress**: Granular phase and byte-level tracking during sync
+- **Enhanced Schema Validation**: Path traversal protection, token validation, source-specific field validation
+- **Plugin Rollback Logging**: Comprehensive logging for rollback operations
 
-## [1.39.0] - 2026-01-25
-
-### Added
-- **Source Cache Factory**: Unified caching interface for plugin sources
-
-## [1.38.0] - 2026-01-25
-
-### Added
-- **Per-File Sync Progress**: Granular progress tracking during sync operations
-  - Phase tracking: scanning, planning, backup, copying, verifying
-  - Byte-level progress for large files
-
-## [1.37.0] - 2026-01-25
-
-### Added
-- **Source Utilities**: Reusable utilities for plugin source implementations
-  - Fluent HTTP request builder with auth support
-  - Automatic retry with exponential backoff
-  - Enhanced caching with statistics
-
-## [1.36.0] - 2026-01-25
-
-### Added
-- **Enhanced Schema Validation**: Stricter validation for configuration files
-  - Path traversal protection
-  - GitHub token format validation
-  - Source-type-specific required field validation
-- **Rollback Logging**: Comprehensive logging for plugin rollback operations
-
-## [1.35.0] - 2026-01-25
-
-### Added
-- **Primitive Hook System**: Reusable building blocks for async operations
-  - Progress tracking with cancellation support
-  - Unified throttle/debounce with configurable options
-  - Stable callbacks that always use latest values
-
-## [1.34.0] - 2026-01-25
-
-### Added
-- **Standardized Error Handling**: Comprehensive error types with user-friendly messages
-  - Typed errors: Network, Validation, Filesystem, Source, Auth, Config, Workflow, Security
-  - Error codes for programmatic handling
-  - UI components for displaying errors
-
-## [1.33.3] - 2026-01-24
-
-### Added
-- **Session Recording & Playback**: Record and replay dev sessions
-  - Capture interactions, navigation, commands, and state changes
-  - Speed control, pause/resume, step-through playback
-  - Keyboard shortcuts: `Ctrl+R` to toggle recording, `Ctrl+P` to open recordings
-
-## [1.33.2] - 2026-01-24
-
-### Added
-- **Debug Marker System**: Interactive debugging tools for development
-  - Create markers with severity levels and status tracking
-  - Add notes during debugging sessions
-  - Export context for code review
-
-## [1.33.1] - 2026-01-24
-
-### Added
-- **Developer Testing Tools**: Separate dev CLI for testing tier functionality
-  - Press `1-4` to instantly switch between Free/Plus/Pro/Max tiers
-  - No real API or account required for tier testing
-
-## [1.33.0] - 2026-01-24
+## [1.33.0-1.33.3] - 2026-01-24
 
 ### Added
 - **Plugin Profiles**: Save and switch between server configurations
-  - Create profiles from current config or start empty
-  - Apply modes: merge (add missing) or replace (full switch)
-  - Import/export profiles as JSON for sharing
-  - Color-coded profiles with lock protection
+  - Create, import/export, and lock profiles
+  - Apply modes: merge or replace
+- **Session Recording**: Record and replay sessions with speed control
+  - `Ctrl+R` to toggle recording, `Ctrl+P` to open recordings
 
-## [1.32.0] - 2026-01-24
-
-### Added
-- **Dry Run / Preview Mode**: See what operations will do before executing
-  - Preview sync, migrate, update, backup, and restore operations
-  - Change indicators: add (+), remove (-), modify (~), skip (○), conflict (!)
-  - Space requirements and duration estimates
-
-## [1.31.0] - 2026-01-24
+## [1.30.0-1.32.0] - 2026-01-24
 
 ### Added
-- **Export/Import Configuration**: Backup and share Pluginator configurations
-  - Export plugins, servers, favorites, tags, groups, settings
-  - Import from file, URL, or text with merge/replace modes
-  - Validation and compatibility checking
-  - Checksum verification for data integrity
+- **Dry Run / Preview Mode**: See what sync, migrate, update, backup, and restore operations will do before executing
+- **Export/Import Configuration**: Backup and share configurations with merge/replace modes and checksum verification
+- **Session History & Audit Log**: Track actions, query by type, and export to JSON/CSV
 
-## [1.30.0] - 2026-01-24
+## [1.26.0-1.29.0] - 2026-01-24
 
 ### Added
-- **Session History & Audit Log**: Comprehensive action tracking
-  - Track downloads, syncs, backups, scans, config changes
-  - Query by action type, plugin, or text search
-  - Statistics: entry counts, session counts, success rates
-  - Export to JSON and CSV
+- **Plugin Groups & Tags**: Organize plugins with custom tags (8 colors), built-in tags, and hierarchical groups
+- **Favorites & Pinned**: Star plugins (`*` key) and pin to top (`p` key)
+- **Quick Filters**: Filter by status, source, and category
+- **Performance Optimization**: API caching, parallel operations, and automatic retry
 
-## [1.29.0] - 2026-01-24
-
-### Added
-- **Performance Optimization**: Caching, parallel execution, and monitoring
-  - API response caching with TTL and LRU eviction
-  - Parallel operations with configurable concurrency
-  - Automatic retry with exponential backoff
-  - Performance metrics tracking
-
-## [1.28.0] - 2026-01-24
+## [1.22.0-1.25.0] - 2026-01-24
 
 ### Added
-- **Plugin Groups & Tags**: Organize plugins with custom tags and groups
-  - Create custom tags with 8 color options
-  - Built-in tags: Essential, Optional, Experimental, Deprecated
-  - Hierarchical groups with status tracking
-  - Filter plugins by tags
-
-## [1.27.0] - 2026-01-24
-
-### Added
-- **Favorites & Pinned**: Mark plugins as favorites and pin important ones
-  - Favorites: starred plugins with optional notes (★)
-  - Pinned: plugins always sorted to top (📌)
-  - Toggle favorite with `*` key, toggle pin with `p` key
-
-## [1.26.0] - 2026-01-24
-
-### Added
-- **Quick Filters**: Filter plugin lists by status, source, and category
-  - Status filters: up-to-date, outdated, error, disabled
-  - Source filters: Modrinth, Spigot, GitHub, Hangar, etc.
-  - Category filters: admin, economy, permissions, world, etc.
-
-## [1.25.0] - 2026-01-24
-
-### Added
-- **Environment Modes**: Production, development, and test environments
-  - Automatic environment detection
-  - Environment-specific paths and configurations
-  - `--env` CLI flag and `PLUGINATOR_ENV` variable
-  - `[DEV]` and `[TEST]` badges in status bar
-
-## [1.24.0] - 2026-01-24
-
-### Added
-- **Update Scheduling**: Automated update checks with scheduler integration
-  - Configurable intervals: hourly, daily, weekly, custom cron
-  - Quiet hours support
-  - `pluginator schedule` CLI command
-  - Platform-specific scheduler command generation (cron, schtasks, launchd)
-
-## [1.23.2] - 2026-01-24
-
-### Added
-- **Operation Flow Documentation**: Living documentation for codebase operations
-
-## [1.23.1] - 2026-01-24
-
-### Added
-- **Sleep Prevention**: Prevent system sleep during long operations (sync, backup)
-  - Cross-platform support: macOS, Windows, Linux
-
-## [1.23.0] - 2026-01-24
-
-### Added
-- **Plugin Statistics Dashboard**: Comprehensive statistics tracking
-  - Track update checks, downloads, errors per plugin
-  - Source response times and check counts
-  - Server health score with breakdown factors
-  - Recommendations based on statistics
-
-## [1.22.0] - 2026-01-24
-
-### Added
-- **Plugin Rollback**: Restore previous plugin versions
-  - Track version history with hashes and metadata
-  - Integrity verification before rollback
-  - `/rollback` command in command palette
-
-## [1.21.1] - 2026-01-24
-
-### Fixed
-- Security improvements: URL validation, YAML deserialization safety, SSRF protection, path traversal prevention
-- Added error boundary for graceful error handling
-
-## [1.21.0] - 2026-01-24
-
-### Added
-- **Plugin Conflict Detection**: Detect and warn about plugin conflicts
-  - Version mismatches between servers
-  - API incompatibilities
-  - Duplicate plugins
-
-## [1.20.0] - 2026-01-24
-
-### Added
-- **Plugin Dependency Resolution**: Automatic dependency checking
-  - Build dependency graphs
-  - Detect missing, circular, and optional dependencies
-  - Visual dependency tree display
+- **Plugin Statistics Dashboard**: Track update checks, downloads, errors, and server health scores
+- **Plugin Rollback**: Restore previous versions with `/rollback` command
+- **Plugin Conflict Detection**: Detect version mismatches, API incompatibilities, and duplicates
+- **Plugin Dependency Resolution**: Dependency graphs, missing/circular dependency detection
+- **Environment Modes**: Production, development, and test modes with `--env` flag
+- **Update Scheduling**: Configurable intervals with quiet hours and `pluginator schedule` command
+- **Sleep Prevention**: Prevents system sleep during long operations (macOS, Windows, Linux)
 
 ## [1.19.0] - 2026-01-24
 
 ### Added
 - **Plugin Changelogs**: View plugin version history and changes
   - Fetch changelogs from Modrinth, GitHub, Hangar
-  - Markdown rendering with syntax highlighting
   - Press `c` in Updates view to view changelog
 
-## [1.18.0] - 2026-01-23
-
-### Fixed
-- Security improvements: SSRF vulnerability fix, localhost-only OAuth binding, session integrity verification
-- Memory leak fixes: file descriptor cleanup, EventEmitter cleanup, unmount state update prevention
-
-## [1.17.0] - 2026-01-23
+## [1.12.0-1.18.0] - 2026-01-23
 
 ### Added
-- **Code Quality Audit**: Comprehensive multi-agent code review with security and performance improvements
-
-## [1.16.0] - 2026-01-23
-
-### Added
-- **Development Infrastructure**: Planning and automation tools
-  - Organized planning directory structure
-  - Version bump automation
-
-## [1.15.0] - 2026-01-23
-
-### Changed
-- Disabled custom themes (bundled presets only for consistency)
-- Updated documentation
-
-## [1.14.0] - 2026-01-23
-
-### Added
-- **GitHub & Release Management**: CI/CD workflows
-  - Automated changelog transformation
-  - Binary release workflow
-  - Issue and discussion templates
-
-## [1.13.0] - 2026-01-23
-
-### Added
-- **Plugin Developer Collaboration**: Partnership program infrastructure
-  - Featured, Sponsored, and Premium partnership types
-  - Developer outreach templates
-
-## [1.12.0] - 2026-01-23
-
-### Added
-- **Auto-Updater System**: Self-update functionality
-  - `/update` command to check for updates
-  - `/version` command to display version and install method
-  - Automatic update check on startup (cached 24 hours)
-  - Install method detection (npm, bun, Homebrew, Scoop, apt, binary)
+- **Auto-Updater**: `/update` and `/version` commands with install method detection
 - **Install Script**: One-line installation for binary downloads
-  - Detects OS and architecture automatically
-  - Supports version selection and custom install paths
-
-## [1.11.0] - 2026-01-23
-
-### Added
-- **File Organization**: Separated bundled and user files
-  - Bundled defaults in package (read-only)
-  - User files in `~/.pluginator/` (editable)
-- **Sources Service**: Manage bundled and user-defined plugin sources
+- **File Organization**: Bundled defaults separated from user files in `~/.pluginator/`
 - **Migration Service**: Automatic migration from legacy file structure
 
-## [1.10.4] - 2026-01-23
+### Security
+- SSRF vulnerability fixes, localhost-only OAuth binding, session integrity verification
 
 ### Fixed
-- List rendering issues where items briefly disappeared
-- Progress indicator going backwards during update checks
+- Memory leaks: file descriptor cleanup, EventEmitter cleanup
 
-## [1.10.0-1.10.3] - 2026-01-23
-
-### Added
-- **React.memo Optimization**: Performance improvements for UI components
-  - Memoized display components to prevent unnecessary re-renders
-
-## [1.9.0-1.9.4] - 2026-01-23
-
-### Added
-- **Virtual List**: Improved scrolling with overscan buffer
-  - `pinToEnd` option for log tailing
-  - Smoother scrolling experience
-
-## [1.8.0-1.8.4] - 2026-01-23
-
-### Added
-- **Auth UI States**: Authentication flow states for login, account view, and first launch
-- **Encrypted Session Storage**: Session tokens encrypted at rest with AES-256-GCM
-
-## [1.7.0-1.7.3] - 2026-01-23
-
-### Added
-- **Crypto Infrastructure**: Token encryption at rest
-  - Machine-specific identifier for key derivation
-  - Secure buffer zeroing for key protection
-- **Auth CLI Helpers**: Session management commands
-
-## [1.6.0-1.6.8] - 2026-01-23
+## [1.6.0-1.11.0] - 2026-01-23
 
 ### Added
 - **Hangar API Integration**: Full support for PaperMC's official plugin repository
-- **Plugin Registry System**: Curated database of 40+ popular plugins with pre-configured sources
-- **Tiered Subscription System**: Usage-based limits with Free, Plus, Pro, and Max tiers
-- **Authentication System**: Email/password, Google OAuth, and GitHub OAuth login
+- **Plugin Registry**: Curated database of 40+ popular plugins with pre-configured sources
+- **Tiered Subscription System**: Free, Plus, Pro, and Max tiers with usage-based limits
+- **Authentication**: Email/password, Google OAuth, and GitHub OAuth login
 - **First-Launch Experience**: Welcome prompt for new users
 - **New Commands**: `/login`, `/logout`, `/account`
-- **UI Components**: Tier badge, usage bars, upgrade prompts, login dialogs
+- **Virtual List Scrolling**: Smooth scrolling with overscan buffer and log tailing
+- **Encrypted Sessions**: Session tokens encrypted at rest with AES-256-GCM
+- **Performance**: React.memo optimization across UI components
 
-### Changed
-- Security and performance audits with various improvements
-
-## [1.5.0-1.5.4] - 2026-01-17 - 2026-01-22
+## [1.4.0-1.5.4] - 2026-01-16
 
 ### Added
-- Improved test coverage
-- Reusable scroll components
+- **Input System**: Robust keyboard handling with throttle/debounce and state machine
+- **Jenkins CI Source**: Jenkins CI plugin source integration
+- **Batch Download**: Download multiple plugins with progress tracking
+- **Plugin Enable/Disable**: Toggle plugins on and off
 
 ### Fixed
-- Jenkins nested folder paths
-- Jenkins sources loading in UI
-- Various download and sync improvements
+- Jenkins nested folder paths and sources loading
 - Download filename now reads actual plugin name from JAR
-- Old plugin versions automatically cleaned up after download
+- Old plugin versions cleaned up after download
 
 ### Changed
-- Downloads now go to TEST server by default (safer workflow)
-- Responsive version columns in Updates tab
-
-## [1.4.0-1.4.1] - 2026-01-16
-
-### Added
-- **Input Sanity Check System**: Robust keyboard input handling
-  - Throttle/debounce for expensive operations
-  - UI state machine with distinct states
-  - Input validation with debug logging
-- Jenkins CI plugin source
-- Batch download with progress tracking
-- Plugin enable/disable functionality
+- Downloads go to TEST server by default (safer workflow)
 
 ## [1.3.0-1.3.3] - 2026-01-16
 
 ### Added
-- **Enhanced Logging System**: Complete logging overhaul
-  - Dual-format output: human-readable + JSONL file format
-  - Category-based filtering
-  - Performance timing
-  - Operation tracing
+- **Logging System**: Dual-format output with category filtering and performance timing
 - **CLI `logs` command**: View and search application logs
-- **Logs UI Tab**: New tab for viewing logs (shortcut: `5`)
-- `formatBytes()` utility for human-readable file sizes
-- `b` keyboard shortcut for quick backup
-- Input sanity check design document
+- **Logs Tab**: New tab for viewing logs (shortcut: `5`)
+- **Quick Backup**: `b` keyboard shortcut for instant backup
 
-## [1.2.0-1.2.6] - 2026-01-14 - 2026-01-16
+## [1.2.0-1.2.6] - 2026-01-14
 
 ### Added
-- **Network Connectivity Detection**: Offline indicator in status bar
-- Dynamic Minecraft version fetching from Mojang API
-- Graceful offline fallback
+- **Offline Detection**: Network connectivity indicator in status bar
+- **Minecraft Version Fetching**: Dynamic version list from Mojang API
 
 ### Fixed
-- Nav bar duplication issues
-- SetupWizard input and scrolling issues
-- Debug mode interference with UI
-- Various rendering glitches
+- Navigation bar duplication, setup wizard input issues, debug mode interference
 
 ### Changed
-- Paper/Purpur sources use PaperMC v3 API
+- Paper/Purpur sources upgraded to PaperMC v3 API
 
 ## [1.1.0] - 2026-01-14
 
 ### Added
 - First-run detection with setup prompt
-- Compact UI layout for smaller terminals
 - Server JAR download (Paper and Purpur support)
 - Command palette (triggered with `:`)
-- Version number in header
 - Confirm dialog with keyboard navigation
-- Alternate screen buffer for clean rendering
 
 ### Fixed
-- Various keyboard input issues
-- Help overlay soft lock
-- Duplicate rendering on tab switch
+- Keyboard input issues and help overlay soft lock
 
 ## [1.0.0] - 2026-01-11
 
@@ -468,15 +408,10 @@ Initial release of the TypeScript version.
 - Plugin management for Minecraft servers
 - Multi-source update checking (Spigot, Modrinth, GitHub, CurseForge, Web Manifest)
 - Production/Test server workflow support
-- Interactive terminal UI
-- Customizable themes
+- Interactive terminal UI with customizable themes
 - JAR file scanning and metadata extraction
 - Checksum verification for downloads
 
 ---
 
-## Previous C++ Version
-
-The original C++ implementation reached version 2.0.3. This TypeScript rewrite starts fresh at v1.0.0 with a new codebase while maintaining feature parity.
-
-For the legacy C++ changelog, see the [pluginator-deprecated](https://github.com/NindroidA/pluginator-deprecated) repository.
+*Pluginator was originally written in C++ (v2.0.3). This TypeScript rewrite started fresh at v1.0.0 with a completely new codebase.*

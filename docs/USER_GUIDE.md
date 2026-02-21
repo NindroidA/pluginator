@@ -1,6 +1,6 @@
 # Pluginator User Guide
 
-> **Last Updated:** January 16, 2025
+> **Last Updated:** February 21, 2026
 
 Complete guide to using Pluginator for Minecraft server plugin management.
 
@@ -15,6 +15,11 @@ Complete guide to using Pluginator for Minecraft server plugin management.
 - [Sync Workflow](#sync-workflow)
 - [Migrate Workflow](#migrate-workflow)
 - [Backup System](#backup-system)
+- [Health Dashboard](#health-dashboard)
+- [Performance Analytics](#performance-analytics)
+- [Recommendations](#recommendations)
+- [Templates](#templates)
+- [Organization](#organization)
 - [Theming](#theming)
 - [Troubleshooting](#troubleshooting)
 
@@ -22,7 +27,15 @@ Complete guide to using Pluginator for Minecraft server plugin management.
 
 ### Prerequisites
 
-Download the appropriate binary for your platform from the [Releases page](https://github.com/NindroidA/pluginator/releases).
+1. Install [Bun](https://bun.sh):
+   ```bash
+   curl -fsSL https://bun.sh/install | bash
+   ```
+
+2. Install Pluginator:
+   ```bash
+   bun install -g pluginator
+   ```
 
 ### Initial Setup
 
@@ -33,10 +46,20 @@ pluginator setup
 ```
 
 This will guide you through:
-1. Setting production server path
-2. Setting test server path
-3. Creating initial configuration
-4. Scanning for existing plugins
+1. Setting production server path (with path validation)
+2. Setting test server path (with path validation)
+3. Selecting Minecraft version and server type
+4. Configuring features, panel connections, and notifications
+5. Scanning for existing plugins
+6. Auto-assigning update sources from the curated registry
+
+**Auto-Source Assignment (v2.2.0):** After scanning, Pluginator automatically matches your plugins to the curated registry and assigns optimal update sources. Manually configured sources are never overwritten.
+
+**Path Validation (v2.1.2):** When you enter a server path, Pluginator verifies the directory exists and contains plugin JAR files. If validation fails, you can:
+- **Retry** - Re-enter the path (your previous input is pre-filled)
+- **Continue Anyway** - Proceed without plugins (useful for new server setups)
+
+**Cached Paths (v2.1.2):** Re-running the setup wizard pre-fills paths from your current config, so you don't have to retype them.
 
 ### Directory Structure
 
@@ -66,13 +89,19 @@ pluginator
 
 ### Navigation
 
-The UI has 5 tabs:
+The UI has 9 tabs (v2.0):
 
 1. **Home** - Dashboard with quick actions and status
 2. **Servers** - Side-by-side comparison of production vs test
-3. **Plugins** - Full plugin list with search
-4. **Updates** - Available updates with checkbox selection
-5. **Logs** - Application logs with filtering (v1.3.0)
+3. **Plugins** - Full plugin list with search and filtering
+4. **Updates** - Available updates with changelog view
+5. **Logs** - Application logs with filtering
+6. **Sync** - Sync status and history
+7. **Health** - Plugin health scores and issues (v2.0)
+8. **Recommendations** - Smart plugin recommendations (v2.0)
+9. **Performance** - Server performance analytics (v2.0)
+
+Press `1-9` to jump directly to any tab.
 
 #### Logs Tab (v1.3.0)
 
@@ -115,7 +144,7 @@ Pluginator uses a state-aware input system (v1.4.0) that validates keys against 
 |-----|--------|-------|
 | `Tab` | Next tab | |
 | `Shift+Tab` | Previous tab | |
-| `1-5` | Jump to tab (Home/Servers/Plugins/Updates/Logs) | |
+| `1-9` | Jump to tab (Home/Servers/Plugins/Updates/Logs/Sync/Health/Recs/Perf) | |
 | `j` / `↓` | Move down | |
 | `k` / `↑` | Move up | |
 | `g` | Jump to top | |
@@ -127,10 +156,10 @@ Pluginator uses a state-aware input system (v1.4.0) that validates keys against 
 | `?` | Show help overlay | |
 | `Ctrl+C` | Quit (press twice) | 2s timeout |
 | `Ctrl+D` | Jump to Logs tab | Quick access |
-| `r` | Refresh current view | |
-| `s` | Scan servers | Throttled 500ms |
-| `u` | Check for updates | Throttled 1000ms |
-| `b` | Create backup | |
+| `r` | Refresh current view | Home tab only |
+| `s` | Scan servers | Home tab only, throttled 500ms |
+| `u` | Check for updates | Home tab only, throttled 1000ms |
+| `b` | Create backup | Home tab only |
 
 #### State-Specific Keys
 
@@ -178,7 +207,32 @@ Command Palette Navigation:
 - `Enter` - Execute selected command
 - `Esc` - Close palette
 
+## Subscription Tiers
+
+Pluginator uses a tiered subscription system. Some features require a higher tier:
+
+| Feature | Free | Plus | Pro | Max |
+|---------|------|------|-----|-----|
+| Scan, Sync, Backup, Updates | Yes | Yes | Yes | Yes |
+| Stats Dashboard | - | Yes | Yes | Yes |
+| Health Dashboard | - | - | Yes | Yes |
+| Recommendations | - | - | Yes | Yes |
+| Performance Analytics | - | - | Yes | Yes |
+| Theme Marketplace | - | - | - | Yes |
+
+Locked tabs show a lock icon in the header. Attempting to access a locked tab shows an upgrade notification. Commands requiring a higher tier are hidden from the command palette.
+
 ## Command Line Usage
+
+### CLI-Only Mode
+
+Use `--no-ui` to skip the interactive TUI:
+
+```bash
+pluginator --no-ui
+```
+
+This lists available CLI subcommands, useful for scripting and CI environments.
 
 ### Check for Updates
 
@@ -482,59 +536,146 @@ cp -r /path/to/restore/* /your/server/plugins/
 
 ## Theming
 
-### Built-in Themes
+Pluginator includes four built-in color themes:
 
-- `default` - Purple/violet tones
-- `ocean` - Blue/cyan tones
-- `forest` - Green/emerald tones
-- `sunset` - Orange/amber tones
+| Theme | Description |
+|-------|-------------|
+| `default` | Purple/violet tones |
+| `ocean` | Blue/cyan tones |
+| `forest` | Green/emerald tones |
+| `sunset` | Orange/amber tones |
 
-### Using a Theme
+### Selecting a Theme
 
 ```bash
 # Via command line
 pluginator --theme ocean
 
-# Via config file
-# Add to pluginator.config:
-THEME=ocean
-```
-
-### Custom Theme
-
-Create `config/theme.json`:
-
-```json
+# Via config file (~/.pluginator/config.json)
 {
-  "extends": "default",
-  "colors": {
-    "primary": "#FF6B6B",
-    "secondary": "#4ECDC4",
-    "success": "#2ECC71",
-    "warning": "#F39C12",
-    "error": "#E74C3C",
-    "info": "#3498DB"
-  }
+  "theme": "ocean"
 }
 ```
 
-### Available Colors
+Themes are bundled presets designed for optimal readability. Custom themes are not supported to ensure consistent UI behavior across updates.
 
-| Property | Description |
-|----------|-------------|
-| `primary` | Main accent color |
-| `secondary` | Secondary accent |
-| `success` | Success messages |
-| `warning` | Warning messages |
-| `error` | Error messages |
-| `info` | Info messages |
-| `text` | Primary text |
-| `textSecondary` | Secondary text |
-| `textMuted` | Muted/dimmed text |
-| `background` | Background color |
-| `surface` | Card/panel backgrounds |
-| `border` | Border colors |
-| `selection` | Selected item highlight |
+### Theme Gallery
+
+Browse and install community themes from the theme gallery:
+
+```bash
+# Open the theme gallery in interactive mode
+# Use the command palette: /themes
+```
+
+The gallery loads themes from the NinSys API. If offline, a bundled gallery of 22 curated themes is available as a fallback.
+
+## Health Dashboard
+
+*Added in v2.0*
+
+The Health Dashboard (Tab 7) provides plugin health monitoring:
+
+### Health Scores
+
+Each plugin receives a health score (0-100) based on:
+- **Compatibility** (40%) - Minecraft/server version support
+- **Security** (30%) - Known vulnerabilities, update recency
+- **Update Status** (30%) - Available updates, version age
+
+### Health Grades
+
+| Grade | Score | Meaning |
+|-------|-------|---------|
+| A | 90-100 | Excellent |
+| B | 75-89 | Good |
+| C | 60-74 | Fair |
+| D | 40-59 | Poor |
+| F | 0-39 | Critical |
+
+### Commands
+
+- `/health` - Open health dashboard
+- `/conflicts` - View plugin conflicts
+
+See [Health System](systems/HEALTH_SYSTEM.md) for full details.
+
+## Performance Analytics
+
+*Added in v2.0*
+
+The Performance Dashboard (Tab 9) monitors server performance:
+
+### Metrics
+
+- TPS (Ticks Per Second)
+- Memory usage
+- Player count
+- Plugin load times
+
+### Features
+
+- Real-time metrics display
+- Historical charts
+- Configurable alerts
+- Baseline detection
+
+### Panel Integrations
+
+Connect to server management panels:
+- AMP
+- Pterodactyl
+- Crafty Controller
+- MCSManager
+
+See [Analytics](architecture/ANALYTICS.md) for full details.
+
+## Recommendations
+
+*Added in v2.0*
+
+The Recommendations tab (Tab 8) suggests plugins based on:
+
+- Plugins commonly used together
+- Popular plugins you don't have
+- Similar alternatives to your plugins
+- Upgrade suggestions
+
+### Commands
+
+- `/recs` - Open recommendations
+
+## Templates
+
+*Added in v2.0*
+
+Apply pre-configured plugin bundles:
+
+```bash
+/templates
+```
+
+### Built-in Templates
+
+- **Survival Server** - EssentialsX, LuckPerms, Vault, WorldGuard
+- **Creative Server** - WorldEdit, FAWE, PlotSquared
+- **Minigames** - Citizens, HolographicDisplays, PlaceholderAPI
+- **Network Hub** - DeluxeHub, ServerSelectorX, TAB
+
+See [Templates](systems/TEMPLATES.md) for full details.
+
+## Organization
+
+*Added in v2.0*
+
+Organize plugins with:
+
+- **Tags** - Custom labels for filtering (`/tags`)
+- **Groups** - Collections for bulk actions (`/groups`)
+- **Profiles** - Saved configurations (`/profiles`)
+- **Favorites** - Quick access to frequent plugins (`/favorites`)
+
+See [Organization](systems/ORGANIZATION.md) for full details.
 
 ## Troubleshooting
 
@@ -575,15 +716,56 @@ Debug logs include:
 - API requests and responses
 - Version comparison details
 - File operations
-- Input validation (v1.4.0) - Accepted/rejected inputs with reasons
-- State transitions (v1.4.0) - UI state changes with triggers
-- Throttled operations (v1.4.0) - Rate-limited action attempts
+- **Input validation** (v1.4.0) - Accepted/rejected inputs with reasons
+- **State transitions** (v1.4.0) - UI state changes with triggers
+- **Throttled operations** (v1.4.0) - Rate-limited action attempts
+
+**Input Validation Logging:**
+
+When debug mode is enabled, all keyboard inputs are validated against the current UI state and logged:
+
+```json
+{
+  "level": "debug",
+  "message": "Input rejected: 's' in progress state",
+  "timestamp": "2025-01-16T10:30:45.123Z",
+  "context": {
+    "key": "s",
+    "state": "progress",
+    "valid": false,
+    "reason": "operation in progress"
+  }
+}
+```
+
+**State Transition Logging:**
+
+UI state changes are tracked with triggers:
+
+```json
+{
+  "level": "info",
+  "message": "UI state transition: idle → command-palette",
+  "timestamp": "2025-01-16T10:30:45.456Z",
+  "context": {
+    "from": "idle",
+    "to": "command-palette",
+    "trigger": "/ or :"
+  }
+}
+```
+
+This helps diagnose:
+- Why certain keys aren't working (wrong state)
+- Unexpected state transitions
+- Race conditions with async operations
 
 ### Getting Help
 
-1. Check the [FAQ](https://github.com/NindroidA/pluginator/discussions)
-2. Search [existing issues](https://github.com/NindroidA/pluginator/issues)
-3. Open a new issue with debug logs
+1. Check the [FAQ](https://github.com/NindroidA/pluginator/wiki/FAQ)
+2. Join the [NindroidSystems Discord](https://discord.gg/nkwMUaVSYH) for quick community help
+3. Search [existing issues](https://github.com/NindroidA/pluginator/issues)
+4. Open a new issue with debug logs
 
 ### Log Files
 
