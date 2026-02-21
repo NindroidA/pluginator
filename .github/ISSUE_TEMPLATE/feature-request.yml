@@ -1,0 +1,91 @@
+name: Feature Request
+description: Suggest a new feature or enhancement for Pluginator
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Feature Request
+
+        We love hearing ideas for improving Pluginator! Please describe your suggestion
+        in as much detail as possible.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Use Case
+      description: |
+        What problem does this feature solve? What are you trying to accomplish?
+        A clear description helps us understand the motivation.
+      placeholder: |
+        I'm always frustrated when...
+        It would be helpful to be able to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: |
+        Describe the solution you'd like. How should it work?
+      placeholder: |
+        I'd like a command that...
+        A new option in the config that...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: |
+        Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        I've tried using... but it doesn't quite work because...
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What area of Pluginator does this relate to?
+      options:
+        - Plugin Sources (adding new sources, improving existing)
+        - Update Checking (detection, notifications)
+        - User Interface (keyboard shortcuts, display)
+        - Configuration (settings, options)
+        - Server Management (sync, backup)
+        - Plugin Registry (adding plugins, categories)
+        - Performance (speed, memory)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority (Your Perspective)
+      description: How important is this feature to your workflow?
+      options:
+        - Nice to have
+        - Would improve my workflow
+        - Critical for my use case
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: |
+        Any other context, screenshots, or examples?
+        Links to similar features in other tools are helpful.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm the following
+      options:
+        - label: I have searched existing issues and feature requests
+          required: true
+        - label: This feature would benefit other users, not just my specific setup
+          required: false

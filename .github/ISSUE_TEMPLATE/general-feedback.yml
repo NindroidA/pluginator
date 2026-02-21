@@ -1,0 +1,60 @@
+name: General Feedback
+description: Share feedback, suggestions, or questions about Pluginator
+labels: ["feedback", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## General Feedback
+
+        Thank you for taking the time to share your thoughts! Whether it's a question,
+        suggestion, or general feedback, we'd love to hear from you.
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Feedback Type
+      description: What kind of feedback are you sharing?
+      options:
+        - Question
+        - Suggestion
+        - Documentation Feedback
+        - Praise / Positive Feedback
+        - General Comment
+    validations:
+      required: true
+
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Your Feedback
+      description: Share your thoughts, questions, or suggestions
+      placeholder: |
+        I wanted to ask about...
+        I think it would be great if...
+        I really like how...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Pluginator Version (if applicable)
+      description: What version are you using?
+      placeholder: "e.g., 1.12.0"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: |
+        Any screenshots, links, or other context that might help?
+
+  - type: checkboxes
+    id: contact
+    attributes:
+      label: Follow-up
+      description: Would you like us to follow up?
+      options:
+        - label: I'm open to discussing this further
+        - label: I'd like to be notified of related updates

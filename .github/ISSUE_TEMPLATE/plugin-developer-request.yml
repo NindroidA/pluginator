@@ -1,0 +1,179 @@
+name: Plugin Developer Partnership Request
+description: Request to integrate your premium plugin with Pluginator's update system
+labels: ["partnership"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Plugin Developer Partnership Request
+
+        Thank you for your interest in partnering with Pluginator! This form helps us
+        understand your plugin and how we can best integrate it with our update checking system.
+
+        **What you'll get:**
+        - Your plugin listed in Pluginator's registry
+        - Update notifications for your users
+        - Increased visibility to Pluginator's user base
+
+        **What we need from you:**
+        - Basic plugin information
+        - A way to check for updates (manifest file or webhook)
+        - Your users are still directed to your marketplace for downloads
+
+  - type: input
+    id: developer-name
+    attributes:
+      label: Developer/Studio Name
+      description: Your username, studio name, company name, etc
+      placeholder: "e.g., GuyMoon, user_name"
+    validations:
+      required: true
+
+  - type: input
+    id: contact-email
+    attributes:
+      label: Contact Email (Optional)
+      description: Email for partnership communications
+      placeholder: "developer@example.com - you are NOT required to provide this here"
+
+  - type: input
+    id: discord
+    attributes:
+      label: Discord Username (Optional)
+      description: For quick technical discussions - you are NOT required to provide this here
+      placeholder: "username#0000 or username"
+
+  - type: dropdown
+    id: marketplace
+    attributes:
+      label: Primary Marketplace
+      description: Where is your plugin primarily sold?
+      options:
+        - SpigotMC
+        - Polymart
+        - BuiltByBit (MC-Market)
+        - Modrinth
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: marketplace-profile
+    attributes:
+      label: Marketplace Profile URL
+      description: Link to your profile page for verification
+      placeholder: "https://www.spigotmc.org/members/yourname.12345/"
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-name
+    attributes:
+      label: Plugin Name
+      description: The name of your plugin
+      placeholder: "e.g., CMI, Geyser, WorldEdit"
+    validations:
+      required: true
+
+  - type: textarea
+    id: plugin-description
+    attributes:
+      label: Plugin Description
+      description: Brief description of what your plugin does (1-2 sentences)
+      placeholder: "An admin plugin with commands and features for server management."
+    validations:
+      required: true
+
+  - type: input
+    id: plugin-url
+    attributes:
+      label: Plugin Marketplace URL
+      description: Link to your plugin's marketplace page
+      placeholder: "https://modrinth.com/plugin/yourplugin"
+    validations:
+      required: true
+
+  - type: input
+    id: current-version
+    attributes:
+      label: Current Version
+      description: Your plugin's current version
+      placeholder: "1.2.3"
+    validations:
+      required: true
+
+  - type: input
+    id: mc-versions
+    attributes:
+      label: Supported Minecraft Versions
+      description: Range of MC versions your plugin supports
+      placeholder: "1.8 - 1.21"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: integration-method
+    attributes:
+      label: Preferred Integration Method
+      description: How should Pluginator check for updates?
+      options:
+        - NinSys-Hosted (We host the manifest, you notify us of releases)
+        - Self-Hosted Manifest (You host a JSON file we check)
+        - Webhook (You send us release notifications)
+        - Not sure (Let's discuss)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: download-method
+    attributes:
+      label: Download Method
+      description: How should users obtain your plugin?
+      options:
+        - Marketplace Redirect (User clicks to go to your marketplace page)
+        - Direct Download with License (User enters license key)
+        - Other (Please explain below)
+        - Not sure (Let's discuss)
+    validations:
+      required: true
+
+  - type: textarea
+    id: existing-api
+    attributes:
+      label: Existing API/Manifest (Optional)
+      description: |
+        Do you already have an API endpoint or manifest file for version checking?
+        If so, please share the URL and any documentation.
+      placeholder: |
+        We have a version API at: https://api.example.com/version
+        Documentation: https://docs.example.com/api
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies (Optional)
+      description: Does your plugin require other plugins to function?
+      placeholder: |
+        - Vault (optional, for economy support)
+        - PlaceholderAPI (optional)
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional Information (Optional)
+      description: Anything else we should know about your plugin or integration preferences?
+      placeholder: |
+        - We release updates weekly
+        - We have a Discord server with 10k members
+        - We'd like to promote this integration to our users
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Agreement
+      description: Please confirm the following
+      options:
+        - label: I am authorized to represent this plugin/developer for partnership agreements
+          required: true
+        - label: I agree to notify Pluginator of new releases (via manifest update or webhook)
+          required: true

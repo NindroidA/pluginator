@@ -1,5 +1,6 @@
 # GitHub config files
 .github/FUNDING.yml
+.github/DISCUSSION_TEMPLATE/
 CLAUDE.md
 
 # OS files

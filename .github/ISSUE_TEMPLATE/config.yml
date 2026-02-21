@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord Community
+    url: https://discord.gg/nkwMUaVSYH
+    about: Join our Discord for quick questions and community support
+  - name: Documentation
+    url: https://github.com/NindroidA/pluginator/blob/main/docs/USER_GUIDE.md
+    about: Check the documentation for usage guides and FAQ
+  - name: Discussions
+    url: https://github.com/NindroidA/pluginator/discussions
+    about: Use GitHub Discussions for general questions and community conversation
