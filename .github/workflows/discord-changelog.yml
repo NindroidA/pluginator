@@ -1,0 +1,120 @@
+name: Discord Changelog Update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/CHANGELOG.md'
+
+jobs:
+  send-changelog:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: discord-changelog
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract and format changelog
+        id: changelog
+        run: |
+          set -euo pipefail
+
+          # Extract version from first changelog entry — handles ## [X.Y.Z] format
+          VERSION=$(grep -oE '## \[[0-9]+\.[0-9]+\.[0-9]+\]' docs/CHANGELOG.md | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          VERSION="v${VERSION:-Latest}"
+
+          # Extract the latest changelog section (between first and second version headers)
+          # Skips [Unreleased], captures ### sections and their content
+          CHANGELOG=$(awk '
+            BEGIN { found=0; in_section=0 }
+            /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {
+              if (found) exit;
+              found=1;
+              next;
+            }
+            found && /^### / {
+              in_section=1;
+              print;
+              next;
+            }
+            found && in_section && /\S/ { print }
+          ' docs/CHANGELOG.md)
+
+          # Validate changelog extraction
+          if [ -z "$CHANGELOG" ]; then
+            echo "::warning::No changelog content extracted, using placeholder"
+            CHANGELOG="See the full changelog for details."
+          fi
+
+          # Random subheader quotes
+          QUOTES=(
+            "Your plugins just leveled up!"
+            "Fresh jars, hot off the press!"
+            "Plugin management just got better!"
+            "Beep boop, new features deployed!"
+            "Another update, another W"
+            "Keeping your server fresh since 2026"
+            "Plugins go brrrrrrr"
+            "New tools in the toolbox!"
+            "Shiny new things ahead!"
+            "The plugin whisperer strikes again"
+            "Server admin life made easier"
+            "Update o'clock!"
+            "More features? Yes please!"
+            "Crafting a better plugin experience"
+            "Your server called — it wants these updates"
+          )
+          QUOTE="${QUOTES[$((RANDOM % ${#QUOTES[@]}))]}"
+
+          # Build message
+          REPO_URL="https://github.com/${{ github.repository }}/blob/main/docs/CHANGELOG.md"
+          HEADER="# Pluginator ${VERSION}"
+          SUBHEADER="> ${QUOTE}"
+          FOOTER="-# [View full changelog](${REPO_URL})"
+
+          MESSAGE=$(printf '%s\n\n%s\n\n%s\n---\n%s' "$HEADER" "$SUBHEADER" "$CHANGELOG" "$FOOTER")
+
+          # Truncate if too long (Discord limit is 2000 chars)
+          if [ "${#MESSAGE}" -gt 1950 ]; then
+            TRUNCATED="${MESSAGE:0:1850}"
+            TRUNCATED=$(echo "$TRUNCATED" | head -n -1)
+            MESSAGE=$(printf '%s\n\n...\n\n---\n%s' "$TRUNCATED" "$FOOTER")
+          fi
+
+          # Use randomized delimiter to prevent injection attacks
+          DELIMITER="EOF_$(openssl rand -hex 8)"
+          {
+            echo "version=$VERSION"
+            echo "content<<${DELIMITER}"
+            echo "$MESSAGE"
+            echo "${DELIMITER}"
+          } >> $GITHUB_OUTPUT
+
+      - name: Send to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          CHANGELOG_CONTENT: ${{ steps.changelog.outputs.content }}
+        run: |
+          set -euo pipefail
+
+          # Mask webhook URL for security
+          echo "::add-mask::$DISCORD_WEBHOOK"
+
+          # Clean up on exit
+          trap 'rm -f payload.json' EXIT
+
+          # Build JSON payload
+          jq -n --arg content "${CHANGELOG_CONTENT}" '{content: $content, flags: 4}' > payload.json
+
+          # Send to Discord with error handling and timeout
+          if ! curl -sf --max-time 30 --connect-timeout 10 \
+               -H "Content-Type: application/json" \
+               -d @payload.json \
+               "$DISCORD_WEBHOOK"; then
+            echo "::error::Failed to send Discord notification"
+            exit 1
+          fi
+
+          echo "Discord notification sent successfully"

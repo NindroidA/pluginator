@@ -33,9 +33,18 @@ THE CONTENTS OF THIS PROJECT ARE PROPRIETARY AND CONFIDENTIAL.
    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
    USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-6. TERMINATION
+6. USER DATA AND CONFIGURATION
+   The restrictions in Section 2 apply only to the Software itself, not to user
+   data. You are free to create, modify, and distribute:
+   - Configuration files (e.g., plugins.json, pluginator.config)
+   - Plugin lists and server configurations
+   - Backup archives created by the Software
+   - Log files generated during operation
+   - Any other data files you create through normal use of the Software
+
+   These files are your property and are not subject to this license.
+
+7. TERMINATION
    This license is effective until terminated. Your rights under this license
    will terminate automatically without notice if you fail to comply with any
    of its terms.
-
-For inquiries, contact: https://github.com/NindroidA
