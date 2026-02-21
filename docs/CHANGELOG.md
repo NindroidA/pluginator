@@ -7,25 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.2.10] - 2026-02-21
+## [2.3.0] - 2026-02-21 — Official Beta Release
 
 ### Added
 - **Numbered Error Codes**: All errors now display a unique `PLG-NNNN` identifier (e.g., `[PLG-1001] Request timed out`)
   - Category-based numbering for easy lookup: network (1xxx), validation (2xxx), filesystem (3xxx), source (4xxx), auth (5xxx), config (6xxx), workflow (7xxx), security (8xxx)
+- **Native Installers**: Platform-specific installers now available for download
+  - `.deb` package for Linux
+  - `.exe` setup installer for Windows (includes PATH setup and uninstaller)
+  - `.pkg` installer for macOS (arm64 + x64)
 - **Developer Partnership Form**: Plugin developers can request integration with Pluginator through GitHub Issues
 
----
-
-## [2.2.9] - 2026-02-21
-
-### Added
-- **Build pipeline**: Added missing build script for CI/CD
+### Changed
+- **Uninstall command**: User data at `~/.pluginator/` is now preserved by default — pass `--remove-data` to opt in to removal
 
 ### Fixed
-- **CI pipeline**: Resolved all lint, TypeScript, and test errors
-- **Bundled data**: Default configuration files now properly included in builds
-- **Theme marketplace**: Fixed theme loading and display
-- **Health dashboard**: Fixed scrolling issues in the health view
+- Resolved all CI/CD pipeline issues (lint, TypeScript, and test errors)
+- Fixed theme marketplace loading and display
+- Fixed health dashboard scrolling
 
 ---
 
@@ -53,7 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Registry API Integration**: Plugin registry loads from NinSys API with bundled fallback
 - **Theme Gallery API**: Theme marketplace loads from live API with offline fallback
-- **Uninstall support**: `pluginator uninstall` command with `--keep-data` option
+- **Uninstall support**: `pluginator uninstall` command with `--remove-data` option
 
 ### Changed
 - All API calls hardened with timeouts and dynamic User-Agent headers
