@@ -1,7 +1,7 @@
 # Pluginator Error Codes
 
 > **Last Updated:** February 21, 2026
-> **Version:** 2.2.10
+> **Version:** 2.3.0
 
 This document describes all error codes used by Pluginator. Each error includes its PLG code, string code, when it occurs, and how to resolve it.
 

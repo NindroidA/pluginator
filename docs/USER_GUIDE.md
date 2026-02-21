@@ -27,15 +27,18 @@ Complete guide to using Pluginator for Minecraft server plugin management.
 
 ### Prerequisites
 
-1. Install [Bun](https://bun.sh):
-   ```bash
-   curl -fsSL https://bun.sh/install | bash
-   ```
+Install Pluginator using your preferred method. See [INSTALLATION.md](INSTALLATION.md) for all options.
 
-2. Install Pluginator:
-   ```bash
-   bun install -g pluginator
-   ```
+```bash
+# macOS
+brew tap NindroidA/pluginator && brew install pluginator
+
+# Windows
+scoop bucket add pluginator https://github.com/NindroidA/scoop-pluginator && scoop install pluginator
+
+# npm (any platform)
+npm install -g @nindroidsystems/pluginator
+```
 
 ### Initial Setup
 
@@ -61,22 +64,22 @@ This will guide you through:
 
 **Cached Paths (v2.1.2):** Re-running the setup wizard pre-fills paths from your current config, so you don't have to retype them.
 
-### Directory Structure
+### User Data Directory
 
-After setup, your structure should look like:
+Pluginator stores its data at `~/.pluginator/`:
 
 ```
-pluginator/
-├── config/
-│   └── pluginator.config    # Main configuration
-├── data/
-│   ├── backups/             # Backup archives
-│   ├── logs/                # Application logs
-│   └── plugin_versions.json # Version cache
-├── plugins.json             # Plugin configuration
-└── SERVER/                  # (or your configured paths)
-    ├── prod/plugins/        # Production plugins
-    └── test/plugins/        # Test server plugins
+~/.pluginator/
+├── config.json           # User configuration
+├── custom-registry.json  # User plugin registry entries
+├── custom-sources.json   # User source overrides
+├── session.json          # Auth session (encrypted)
+├── servers/              # Per-server plugin data
+│   └── <server-id>/
+│       └── plugins.json
+├── backups/              # Backup archives
+├── cache/                # Cache files
+└── logs/                 # Application logs
 ```
 
 ## Interactive Mode
@@ -89,19 +92,19 @@ pluginator
 
 ### Navigation
 
-The UI has 9 tabs (v2.0):
+The UI has 9 tabs:
 
 1. **Home** - Dashboard with quick actions and status
 2. **Servers** - Side-by-side comparison of production vs test
 3. **Plugins** - Full plugin list with search and filtering
 4. **Updates** - Available updates with changelog view
 5. **Logs** - Application logs with filtering
-6. **Sync** - Sync status and history
-7. **Health** - Plugin health scores and issues (v2.0)
-8. **Recommendations** - Smart plugin recommendations (v2.0)
-9. **Performance** - Server performance analytics (v2.0)
+6. **Stats** - Plugin statistics and metrics (Plus tier)
+7. **Health** - Plugin health scores and issues (Pro tier)
+8. **Recommendations** - Smart plugin recommendations (Pro tier)
+9. **Performance** - Server performance analytics (Pro tier)
 
-Press `1-9` to jump directly to any tab.
+Press `1-9` to jump directly to any tab. Tabs requiring a higher tier show a lock icon.
 
 #### Logs Tab (v1.3.0)
 
@@ -156,10 +159,6 @@ Pluginator uses a state-aware input system (v1.4.0) that validates keys against 
 | `?` | Show help overlay | |
 | `Ctrl+C` | Quit (press twice) | 2s timeout |
 | `Ctrl+D` | Jump to Logs tab | Quick access |
-| `r` | Refresh current view | Home tab only |
-| `s` | Scan servers | Home tab only, throttled 500ms |
-| `u` | Check for updates | Home tab only, throttled 1000ms |
-| `b` | Create backup | Home tab only |
 
 #### State-Specific Keys
 
@@ -185,7 +184,9 @@ Keys may be disabled in certain UI states:
 
 ### Command Palette
 
-Press `/` or `:` to open the command palette. Type to search commands:
+Press `/` or `:` to open the command palette. Type to search commands.
+
+Common commands:
 
 | Command | Description |
 |---------|-------------|
@@ -193,19 +194,19 @@ Press `/` or `:` to open the command palette. Type to search commands:
 | `/sync` | Sync plugins from production to test |
 | `/updates` | Check all plugins for available updates |
 | `/backup` | Create a backup of plugin directories |
-| `/refresh` | Reload configuration and rescan servers |
-| `/download` | Download latest Paper or Purpur server JAR |
-| `/config` | View configuration settings |
-| `/home` | Navigate to home dashboard |
-| `/servers` | Navigate to servers view |
-| `/plugins` | Navigate to plugins list |
+| `/setup` | Run the setup wizard |
+| `/config-edit` | Edit configuration interactively |
+| `/update` | Check for Pluginator updates |
 | `/help` | Display keyboard shortcuts |
 | `/quit` | Exit Pluginator |
+
+See [COMMANDS.md](COMMANDS.md) for the full list of 74+ commands.
 
 Command Palette Navigation:
 - `↑`/`↓` - Navigate through commands
 - `Enter` - Execute selected command
 - `Esc` - Close palette
+- Commands requiring a higher tier are hidden automatically
 
 ## Subscription Tiers
 
@@ -402,42 +403,22 @@ Use owner/repo format:
 
 ## Server Configuration
 
-Main configuration file: `config/pluginator.config`
+Configuration is stored at `~/.pluginator/config.json`. Edit it interactively with the `/config-edit` command, or via the `/setup` wizard.
 
-```ini
-# Debug mode (0 = off, 1 = on)
-PLUGINATOR_DEBUG=0
-
-# Server paths (absolute or relative)
-PROD_SERVER_PATH=./SERVER/prod/plugins
-TEST_SERVER_PATH=./SERVER/test/plugins
-
-# Backup settings
-BACKUP_DIR=./data/backups
-MAX_BACKUPS=5
-
-# Logging
-LOGS_DIR=./data/logs
-MAX_LOG_DAYS=30
-
-# Target Minecraft version
-MINECRAFT_VERSION=1.21.1
-
-# API settings
-API_TIMEOUT=30
-DOWNLOAD_THREADS=2
-
-# Optional API keys
-GITHUB_TOKEN=ghp_xxxxxxxxxxxx
-CURSEFORGE_API_KEY=xxxxxxxxxx
-```
+Key settings include:
+- **Server paths** — Production and test plugin directories
+- **Minecraft version** — Target version for compatibility checks
+- **Backup settings** — Retention count and backup directory
+- **API keys** — Optional GitHub token, CurseForge API key
 
 ### Environment Variables
 
-All config values can be overridden with environment variables:
-
 ```bash
-PROD_SERVER_PATH=/custom/path pluginator
+# Enable debug logging
+PLUGINATOR_DEBUG=1 pluginator
+
+# Custom API endpoint
+PLUGINATOR_API_URL=https://api.nindroidsystems.com
 ```
 
 ## Update Checking
@@ -522,7 +503,7 @@ Old backups are automatically removed based on `MAX_BACKUPS` setting.
 
 Format: `backup-{type}-{timestamp}.tar.gz`
 
-Example: `backup-prod-2025-01-15T10-30-00.tar.gz`
+Example: `backup-prod-2026-02-21T10-30-00.tar.gz`
 
 ### Restoring from Backup
 
@@ -557,9 +538,9 @@ pluginator --theme ocean
 }
 ```
 
-Themes are bundled presets designed for optimal readability. Custom themes are not supported to ensure consistent UI behavior across updates.
-
 ### Theme Gallery
+
+*Requires Max tier*
 
 Browse and install community themes from the theme gallery:
 
@@ -568,7 +549,9 @@ Browse and install community themes from the theme gallery:
 # Use the command palette: /themes
 ```
 
-The gallery loads themes from the NinSys API. If offline, a bundled gallery of 22 curated themes is available as a fallback.
+The gallery loads themes from the NinSys API. If offline, a bundled gallery of curated themes is available as a fallback.
+
+See [THEME_SYSTEM.md](systems/THEME_SYSTEM.md) for full theme documentation.
 
 ## Health Dashboard
 
@@ -762,20 +745,20 @@ This helps diagnose:
 
 ### Getting Help
 
-1. Check the [FAQ](https://github.com/NindroidA/pluginator/wiki/FAQ)
+1. Check the [Troubleshooting Guide](TROUBLESHOOTING.md)
 2. Join the [NindroidSystems Discord](https://discord.gg/nkwMUaVSYH) for quick community help
 3. Search [existing issues](https://github.com/NindroidA/pluginator/issues)
 4. Open a new issue with debug logs
 
 ### Log Files
 
-Logs are stored in the configured `LOGS_DIR`:
+Logs are stored in `~/.pluginator/logs/`:
 
 ```
-data/logs/
-├── pluginator-2025-01-15.log
-├── pluginator-2025-01-14.log
+~/.pluginator/logs/
+├── pluginator-2026-02-21.log
+├── pluginator-2026-02-20.log
 └── ...
 ```
 
-Old logs are automatically cleaned up based on `MAX_LOG_DAYS`.
+Log files are created daily and automatically cleaned up.

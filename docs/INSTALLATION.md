@@ -18,16 +18,14 @@ scoop bucket add pluginator https://github.com/NindroidA/scoop-pluginator
 scoop install pluginator
 ```
 
-### Linux (APT - Debian/Ubuntu)
+### Linux (Debian/Ubuntu .deb)
 
 ```bash
-# Add repository
-curl -fsSL https://pluginator.dev/apt/gpg.key | sudo gpg --dearmor -o /usr/share/keyrings/pluginator.gpg
-echo "deb [signed-by=/usr/share/keyrings/pluginator.gpg] https://pluginator.dev/apt stable main" | sudo tee /etc/apt/sources.list.d/pluginator.list
+# Download the .deb from the latest release
+curl -LO https://github.com/NindroidA/pluginator/releases/latest/download/pluginator-linux-x64.deb
 
 # Install
-sudo apt update
-sudo apt install pluginator
+sudo dpkg -i pluginator-linux-x64.deb
 ```
 
 ### Any Platform (npm)
@@ -45,39 +43,48 @@ bun install -g pluginator
 ### One-Line Script
 
 ```bash
-curl -fsSL https://pluginator.dev/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/NindroidA/pluginator/main/scripts/install.sh | bash
 ```
 
 The script automatically detects your OS and architecture.
 
-## Binary Downloads
+## Downloads
 
-Direct downloads are available at:
+All downloads are available at:
 https://github.com/NindroidA/pluginator/releases/latest
 
-### Available Binaries
+### Native Installers
+
+| Platform | File | Notes |
+|----------|------|-------|
+| macOS (Apple Silicon) | `.pkg` | Double-click to install to `/usr/local/bin/` |
+| macOS (Intel) | `.pkg` | Double-click to install to `/usr/local/bin/` |
+| Windows | `-setup.exe` | Installer with PATH setup and uninstaller |
+| Linux (Debian/Ubuntu) | `.deb` | Install with `sudo dpkg -i` |
+
+### Standalone Binaries
 
 | Platform | Architecture | Filename |
 |----------|--------------|----------|
-| macOS | Apple Silicon (M1/M2/M3) | `pluginator-darwin-arm64.tar.gz` |
-| macOS | Intel | `pluginator-darwin-x64.tar.gz` |
-| Linux | x64 | `pluginator-linux-x64.tar.gz` |
-| Linux | ARM64 | `pluginator-linux-arm64.tar.gz` |
-| Windows | x64 | `pluginator-win-x64.zip` |
+| macOS | Apple Silicon (M1/M2/M3) | `pluginator-{version}-darwin-arm64.tar.gz` |
+| macOS | Intel | `pluginator-{version}-darwin-x64.tar.gz` |
+| Linux | x64 | `pluginator-{version}-linux-x64.tar.gz` |
+| Linux | ARM64 | `pluginator-{version}-linux-arm64.tar.gz` |
+| Windows | x64 | `pluginator-{version}-windows-x64.zip` |
 
 ### Manual Binary Installation
 
 #### macOS/Linux
 
 ```bash
-# Download (replace with your platform)
-curl -LO https://github.com/NindroidA/pluginator/releases/latest/download/pluginator-linux-x64.tar.gz
+# Download (replace version and platform)
+curl -LO https://github.com/NindroidA/pluginator/releases/latest/download/pluginator-2.3.0-linux-x64.tar.gz
 
 # Extract
-tar -xzf pluginator-linux-x64.tar.gz
+tar -xzf pluginator-2.3.0-linux-x64.tar.gz
 
 # Move to PATH
-sudo mv pluginator /usr/local/bin/
+sudo mv pluginator-* /usr/local/bin/pluginator
 
 # Verify
 pluginator --version
@@ -85,10 +92,11 @@ pluginator --version
 
 #### Windows
 
-1. Download `pluginator-win-x64.zip`
-2. Extract to a folder (e.g., `C:\Program Files\Pluginator`)
-3. Add the folder to your PATH
-4. Open a new terminal and run `pluginator --version`
+1. Download the `-setup.exe` installer and run it, **or**:
+2. Download `pluginator-{version}-windows-x64.zip`
+3. Extract to a folder (e.g., `C:\Program Files\Pluginator`)
+4. Add the folder to your PATH
+5. Open a new terminal and run `pluginator --version`
 
 ## Verifying Installation
 
@@ -98,7 +106,7 @@ pluginator --version
 
 Expected output:
 ```
-pluginator v1.12.0
+pluginator v2.3.0
 ```
 
 ## Requirements
@@ -127,7 +135,7 @@ Quick reference:
 | Bun | `bun update -g pluginator` |
 | Homebrew | `brew upgrade pluginator` |
 | Scoop | `scoop update pluginator` |
-| APT | `sudo apt update && sudo apt upgrade pluginator` |
+| .deb | Download new `.deb` from releases |
 | Binary | Re-run install script or download new release |
 
 ## Uninstalling
@@ -156,10 +164,10 @@ brew uninstall pluginator
 scoop uninstall pluginator
 ```
 
-### APT
+### .deb (Linux)
 
 ```bash
-sudo apt remove pluginator
+sudo dpkg -r pluginator
 ```
 
 ### Binary
@@ -170,9 +178,13 @@ sudo rm /usr/local/bin/pluginator
 
 ### User Data
 
-To remove all user data:
+User data at `~/.pluginator/` is preserved by default during uninstall. To also remove it:
 
 ```bash
+# Via the CLI (recommended)
+pluginator uninstall --remove-data
+
+# Or manually
 rm -rf ~/.pluginator
 ```
 

@@ -167,14 +167,17 @@ pluginator auth clear
 Recommended permissions:
 
 ```bash
+# User data directory
+chmod 700 ~/.pluginator/
+
 # Configuration files
-chmod 600 config/pluginator.config
-chmod 600 config/theme.json
+chmod 600 ~/.pluginator/config.json
+chmod 600 ~/.pluginator/session.json
 
 # Data directories
-chmod 700 data/
-chmod 700 data/backups/
-chmod 700 data/logs/
+chmod 700 ~/.pluginator/backups/
+chmod 700 ~/.pluginator/logs/
+chmod 700 ~/.pluginator/cache/
 ```
 
 ### Input Validation
@@ -216,19 +219,13 @@ Built-in rate limiting prevents abuse:
 
 ### Request Timeouts
 
-All requests have configurable timeouts:
-
-```ini
-API_TIMEOUT=30  # seconds
-```
+All HTTP requests have hardcoded timeouts (8-10 seconds) to prevent hanging connections.
 
 ### User-Agent Headers
 
 Proper identification in requests:
 
-```
-User-Agent: Pluginator/1.0.0 (https://github.com/NindroidA/pluginator)
-```
+The User-Agent header is dynamically set from `package.json` version (e.g., `Pluginator/2.3.0`).
 
 ## Backup Security
 
@@ -241,20 +238,11 @@ Backups are tar.gz archives with predictable structure:
 
 ### Backup Rotation
 
-Automatic cleanup prevents disk exhaustion:
-
-```ini
-MAX_BACKUPS=5  # Only keep 5 most recent
-```
+Automatic cleanup prevents disk exhaustion. Configure max backup count in `~/.pluginator/config.json`.
 
 ### Backup Location
 
-Store backups in a secure location:
-
-```ini
-# Outside web-accessible directories
-BACKUP_DIR=/var/backups/pluginator
-```
+Backups are stored in `~/.pluginator/backups/` by default.
 
 ## Logging Security
 
@@ -267,16 +255,12 @@ Logs are sanitized to avoid exposing:
 
 ### Log Rotation
 
-Automatic cleanup:
-
-```ini
-MAX_LOG_DAYS=30  # Delete logs older than 30 days
-```
+Log files are created daily and automatically cleaned up.
 
 ### Log Permissions
 
 ```bash
-chmod 600 data/logs/*.log
+chmod 600 ~/.pluginator/logs/*.log
 ```
 
 ## Secure Development Practices

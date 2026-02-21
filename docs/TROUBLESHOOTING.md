@@ -98,7 +98,7 @@ PLUGINATOR_DEBUG=1 pluginator
 **Solutions:**
 
 1. Verify your credentials
-2. Reset password at https://pluginator.io/reset-password
+2. Reset password at https://pluginator.nindroidsystems.com/reset-password
 3. Try OAuth login (Google/GitHub) instead
 
 ### Sync Errors
@@ -403,8 +403,8 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 2. Ask in the [NindroidSystems Discord](https://discord.gg/nkwMUaVSYH) for quick help
 3. Search [GitHub Issues](https://github.com/NindroidA/pluginator/issues)
 4. Export debug context
-4. Note the exact error message
-5. Note your environment (OS, Node version, terminal)
+5. Note the exact error message
+6. Note your environment (OS, terminal, install method)
 
 ### Reporting Issues
 

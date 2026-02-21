@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.1] - 2026-02-21
+
+### Fixed
+- Fixed incorrect URLs, outdated paths, and inconsistencies across all public documentation
+- Updated installation guide with native installer table and correct download URLs
+- Updated user guide with current tab layout, command list, and directory structure
+
+---
+
 ## [2.3.0] - 2026-02-21 — Official Beta Release
 
 ### Added
