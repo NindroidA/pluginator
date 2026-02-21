@@ -74,13 +74,16 @@ jobs:
           SUBHEADER="> ${QUOTE}"
           FOOTER="-# [View full changelog](${REPO_URL})"
 
-          MESSAGE=$(printf '%s\n\n%s\n\n%s\n---\n%s' "$HEADER" "$SUBHEADER" "$CHANGELOG" "$FOOTER")
+          # Strip trailing dividers (---) from changelog content
+          CHANGELOG=$(echo "$CHANGELOG" | sed '/^---$/d')
+
+          MESSAGE=$(printf '%s\n\n%s\n\n%s\n\n%s' "$HEADER" "$SUBHEADER" "$CHANGELOG" "$FOOTER")
 
           # Truncate if too long (Discord limit is 2000 chars)
           if [ "${#MESSAGE}" -gt 1950 ]; then
             TRUNCATED="${MESSAGE:0:1850}"
             TRUNCATED=$(echo "$TRUNCATED" | head -n -1)
-            MESSAGE=$(printf '%s\n\n...\n\n---\n%s' "$TRUNCATED" "$FOOTER")
+            MESSAGE=$(printf '%s\n\n...\n\n%s' "$TRUNCATED" "$FOOTER")
           fi
 
           # Use randomized delimiter to prevent injection attacks
