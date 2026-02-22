@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.4] - 2026-02-21
+
+### Added
+- **GeyserMC Source**: Native support for downloading Geyser and Floodgate plugins directly from the GeyserMC download API
+  - Geyser and Floodgate now use the official GeyserMC API as their preferred source
+  - Hangar and Modrinth sources available as fallbacks
+
+### Fixed
+- Fixed package name in uninstall and update commands (v2.3.3)
+- Fixed native binding crash on npm/bun installs (v2.3.2)
+
+---
+
 ## [2.3.1] - 2026-02-21
 
 ### Fixed
