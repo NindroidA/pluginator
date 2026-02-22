@@ -1,6 +1,6 @@
 # Pluginator Tier System
 
-> **Last Updated:** February 21, 2026
+> **Last Updated:** February 22, 2026
 
 ## Overview
 
@@ -8,12 +8,12 @@ Pluginator uses a tiered subscription system to support ongoing development whil
 
 ## Tiers
 
-| Tier | Price | Checks/Day | Downloads/Day | Syncs/Day | Max Servers | Custom Servers |
-|------|-------|------------|---------------|-----------|-------------|----------------|
-| **Free** | $0 | 10 | 5 | 3 | 1 | No |
-| **Plus** | $14.99 (one-time) | 50 | 25 | 15 | 3 | No |
-| **Pro** | $4.99/mo | 100 | 50 | 30 | 10 | Yes |
-| **Max** | $9.99/mo | Unlimited | Unlimited | Unlimited | Unlimited | Yes |
+| Tier | Price | Update Checks/Day | Downloads/Day | Syncs/Day | Migrations/Day |
+|------|-------|-------------------|---------------|-----------|----------------|
+| **Free** | $0 | 3 | 15 | 2 | 1 |
+| **Plus** | $14.99 (one-time) | 10 | 50 | 5 | 3 |
+| **Pro** | $4.99/mo | 25 | 150 | 15 | 10 |
+| **Max** | $9.99/mo | Unlimited | Unlimited | Unlimited | Unlimited |
 
 ### Plus Discount
 
@@ -24,28 +24,25 @@ Plus tier holders receive permanent discounts on subscription tiers:
 ## Features by Tier
 
 ### Free Tier
-- Basic update checking (10/day)
-- Basic downloads (5/day)
-- Basic syncs (3/day)
-- 1 server
+- 3 update checks/day
+- 15 plugin downloads/day
+- 2 server syncs/day
+- 1 prod migration/day
 - Access to curated plugin registry
 - Core UI tabs (Home, Servers, Plugins, Updates, Logs)
 
 ### Plus Tier
 - Everything in Free
-- Increased limits (50 checks, 25 downloads, 15 syncs)
-- Up to 3 servers
+- Increased limits (10 checks, 50 downloads, 5 syncs, 3 migrations)
 - **Stats Dashboard** tab
 - **Tags & Groups** for plugin organization
-- Chord key sequences
-- Permanent discount on Pro/Max
+- Backup & restore tools
+- Permanent discount on Pro/Max (40% off Pro, 20% off Max)
 - One-time purchase (no subscription)
 
 ### Pro Tier
 - Everything in Plus
-- Higher limits (100 checks, 50 downloads, 30 syncs)
-- Up to 10 servers, 25 GB cloud storage
-- Custom server configurations
+- Higher limits (25 checks, 150 downloads, 15 syncs, 10 migrations)
 - **Health Dashboard** tab
 - **Recommendations** tab
 - **Performance Analytics** tab
@@ -56,7 +53,6 @@ Plus tier holders receive permanent discounts on subscription tiers:
 ### Max Tier
 - Unlimited everything
 - All Pro features
-- 50 GB cloud storage, API access
 - **Theme Marketplace**
 - **Accessibility Settings**
 - Early access to new features
@@ -106,9 +102,10 @@ Account: user@example.com
 Tier: Plus
 
 Today's Usage:
-  Update Checks: 12/50
-  Downloads: 3/25
-  Syncs: 1/15
+  Update Checks: 4/10
+  Downloads: 12/50
+  Syncs: 2/5
+  Migrations: 0/3
 ```
 
 ## Upgrading

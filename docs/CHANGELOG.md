@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.5] - 2026-02-22
+
+### Changed
+- **Tier system restructured**: Limits are now per-operation (1 button click = 1 usage, regardless of how many plugins are affected)
+  - Migrations now tracked separately from syncs
+  - Updated limits across all tiers to reflect per-operation counting
+- **Tier enforcement active**: Daily limits are now checked and enforced before operations
+  - Warning notification shown when limit is reached
+  - Works offline — allows all actions when API is unavailable
+
+---
+
 ## [2.3.4] - 2026-02-21
 
 ### Added
