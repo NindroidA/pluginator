@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.6] - 2026-02-23
+
+### Added
+- **ElytraRace** plugin added to the curated registry — competitive elytra racing with rings, timers, and leaderboards
+
+---
+
 ## [2.3.5] - 2026-02-22
 
 ### Changed
