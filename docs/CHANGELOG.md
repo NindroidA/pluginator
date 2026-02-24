@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.7] - 2026-02-24
+
+### Added
+- **Offline subscription detection**: Pluginator now detects expired subscriptions locally — no internet needed. If your subscription lapses, you're gracefully downgraded to your fallback tier
+- **Headless server login**: New `pluginator login --token <token>` command lets you authenticate on CLI-only servers using a Personal Access Token (generate at nindroidsystems.com/account/tokens)
+- **Device session tracking**: Your CLI now identifies itself to the API for concurrent session management
+- **Session revocation**: If your session is ended from another device, Pluginator handles it cleanly
+
+---
+
 ## [2.3.6] - 2026-02-23
 
 ### Added
