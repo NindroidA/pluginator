@@ -1,10 +1,12 @@
 name: Discord Changelog Update
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'docs/CHANGELOG.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to announce (e.g. v2.3.7). Leave empty to auto-detect from changelog.'
+        required: false
+        type: string
 
 jobs:
   send-changelog:
@@ -18,12 +20,20 @@ jobs:
 
       - name: Extract and format changelog
         id: changelog
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
 
-          # Extract version from first changelog entry — handles ## [X.Y.Z] format
-          VERSION=$(grep -oE '## \[[0-9]+\.[0-9]+\.[0-9]+\]' docs/CHANGELOG.md | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-          VERSION="v${VERSION:-Latest}"
+          # Use manually provided version or auto-detect from changelog
+          if [ -n "${INPUT_VERSION}" ]; then
+            VERSION="${INPUT_VERSION}"
+            # Ensure v prefix
+            [[ "$VERSION" != v* ]] && VERSION="v${VERSION}"
+          else
+            VERSION=$(grep -oE '## \[[0-9]+\.[0-9]+\.[0-9]+\]' docs/CHANGELOG.md | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+            VERSION="v${VERSION:-Latest}"
+          fi
 
           # Extract the latest changelog section (between first and second version headers)
           # Skips [Unreleased], captures ### sections and their content
