@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.8] - 2026-02-25
+
+### Added
+- **Two-factor authentication**: CLI login now supports 2FA — if your account has TOTP enabled, you'll be prompted for your authenticator code after entering your password
+- **`pluginator update` command**: Check for Pluginator updates from the command line (`pluginator update` or `/update` in the TUI)
+
+### Fixed
+- **Auto-updater**: The `/update` command in the TUI was not functional — now properly checks GitHub releases and shows update instructions
+
+---
+
 ## [2.3.7] - 2026-02-24
 
 ### Added
