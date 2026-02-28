@@ -1,6 +1,6 @@
 # Installation Guide
 
-> **Last Updated:** February 25, 2026
+> **Last Updated:** February 21, 2026
 
 ## Quick Install
 
@@ -31,22 +31,14 @@ sudo dpkg -i pluginator-linux-x64.deb
 ### Any Platform (npm)
 
 ```bash
-npm install -g @nindroidsystems/pluginator
+npm install -g pluginator
 ```
 
 ### Any Platform (Bun)
 
 ```bash
-bun install -g @nindroidsystems/pluginator
+bun install -g pluginator
 ```
-
-### One-Line Script
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/NindroidA/pluginator/main/scripts/install.sh | bash
-```
-
-The script automatically detects your OS and architecture.
 
 ## Downloads
 
@@ -131,8 +123,8 @@ Quick reference:
 
 | Install Method | Update Command |
 |----------------|----------------|
-| npm | `npm update -g @nindroidsystems/pluginator` |
-| Bun | `bun update -g @nindroidsystems/pluginator` |
+| npm | `npm update -g pluginator` |
+| Bun | `bun update -g pluginator` |
 | Homebrew | `brew upgrade pluginator` |
 | Scoop | `scoop update pluginator` |
 | .deb | Download new `.deb` from releases |
@@ -143,13 +135,13 @@ Quick reference:
 ### npm
 
 ```bash
-npm uninstall -g @nindroidsystems/pluginator
+npm uninstall -g pluginator
 ```
 
 ### Bun
 
 ```bash
-bun remove -g @nindroidsystems/pluginator
+bun remove -g pluginator
 ```
 
 ### Homebrew
@@ -207,13 +199,13 @@ export PATH="$PATH:$(npm bin -g)"
 For system-wide installs, use `sudo`:
 
 ```bash
-sudo npm install -g @nindroidsystems/pluginator
+sudo npm install -g pluginator
 ```
 
 Or install to user directory:
 
 ```bash
-npm install -g @nindroidsystems/pluginator --prefix ~/.local
+npm install -g pluginator --prefix ~/.local
 ```
 
 ### Homebrew tap not found

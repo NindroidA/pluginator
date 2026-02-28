@@ -59,8 +59,6 @@ npm install -g @nindroidsystems/pluginator
 # Bun (any platform)
 bun install -g @nindroidsystems/pluginator
 
-# One-line script (Linux/macOS)
-curl -fsSL https://raw.githubusercontent.com/NindroidA/pluginator/main/scripts/install.sh | bash
 ```
 
 See [Installation Guide](docs/INSTALLATION.md) for detailed instructions.
@@ -93,12 +91,12 @@ pluginator sync                 # Sync prod to test
 
 ## Tier System
 
-| Tier | Price | Update Checks/Day | Downloads/Day | Syncs/Day | Migrations/Day |
-|------|-------|-------------------|---------------|-----------|----------------|
-| Free | $0 | 3 | 15 | 2 | 1 |
-| Plus | $14.99 (one-time) | 10 | 50 | 5 | 3 |
-| Pro | $4.99/mo | 25 | 150 | 15 | 10 |
-| Max | $9.99/mo | Unlimited | Unlimited | Unlimited | Unlimited |
+| Tier | Price | Checks/Day | Downloads/Day |
+|------|-------|------------|---------------|
+| Free | $0 | 10 | 5 |
+| Plus | $14.99 (one-time) | 50 | 25 |
+| Pro | $4.99/mo | 100 | 50 |
+| Max | $9.99/mo | Unlimited | Unlimited |
 
 See [Tier System](docs/TIER_SYSTEM.md) for details.
 
