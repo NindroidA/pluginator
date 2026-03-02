@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.17] - 2026-03-02
+
+### Added
+- **Expanded plugin registry**: 104 curated plugins (up from 42) with verified sources across Spigot, Modrinth, GitHub, Jenkins, and Hangar
+- **Manual download notifications**: Paid/premium plugins now get version checking — new "Manual Updates Available" section shows when updates are available with links to plugin pages
+- **`/auto-source` command**: Re-assign all plugins to their recommended registry sources in one step
+- **Dismissal cache**: Infrastructure for dismissing duplicate-file warnings with 24-hour expiry
+- **Changelog shortcut**: Press `l` on the Updates tab to view a plugin's changelog
+
+### Fixed
+- **Disabled plugin display**: When both an enabled `.jar` and a disabled `.jar.disabled` exist, the enabled version is now correctly shown instead of the last-scanned version winning
+- **Keyboard shortcut conflict**: Remapped `c` key across 7 views to prevent interference with Ctrl+C quit behavior — uses `l` (changelog), `x` (clear), `w` (collapse), `t` (category) depending on context
+- **Premium plugin sources**: ItemsAdder, MythicMobs, and ShopGUI+ now correctly marked as manual-download to prevent failed auto-download attempts
+
+### Changed
+- **Status bar hints**: Updates tab now shows `l:changelog` instead of `c:changelog`
+- **Help overlay**: Added `l` (changelog) to global keyboard shortcuts reference
+
+---
+
 ## [2.3.16] - 2026-03-01
 
 ### Added
