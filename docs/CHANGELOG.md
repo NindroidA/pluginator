@@ -7,6 +7,76 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.16] - 2026-03-01
+
+### Added
+- **Disabled-state preservation**: Downloading an update for a disabled plugin now keeps it disabled instead of creating an enabled duplicate
+- **Unrecognized file detection**: Sync and migrate now flag stale JAR remnants (`.jar.old`, `.jar.bak`, `.jar.backup`, `.jar.off`) in your plugins directory
+- **Rollback disabled-file support**: Restoring from backup now correctly finds disabled plugin variants
+
+### Fixed
+- **Checksum verification**: Fixed a bug where checksum verification could fail after updating a disabled plugin
+- **Server detection**: Running-server detection no longer false-positives on directories with similar names (e.g., `/mc` won't match `/mc-staging`)
+- **Safe-mode migration rollback**: If a plugin is skipped or fails during safe-mode migration, the original file is restored instead of left disabled
+- **Sync duplicate cleanup**: Stale duplicate JARs in the target directory are now cleaned up before copying
+
+---
+
+## [2.3.15] - 2026-02-28
+
+### Fixed
+- **Security hardening**: ReDoS protection on CLI regex input, SSRF validation on API URLs, JSON response size limits, download filename sanitization
+- **Dead code cleanup**: Removed unused hooks, components, and utility functions
+- **Expired tier handling**: Expired subscriptions now fall back to free-tier limits instead of blocking all actions
+- **UI improvements**: Fixed empty states, help overlay key hints, config view labels, and keyboard shortcut hints
+
+### Changed
+- **Performance**: Optimized command palette sorting, log view search, and progress bar rendering
+
+---
+
+## [2.3.14] - 2026-02-28
+
+### Fixed
+- **55 code review findings** addressed across security, logic, and UX categories
+- **278 new tests** added to cover fixed behaviors
+
+---
+
+## [2.3.12] - 2026-02-26
+
+### Added
+- **Directory browser in setup wizard**: Press Tab during path input to toggle a filesystem browser — navigate with arrow keys, Enter to select, Backspace to go up
+- **`pluginator setup --headless`**: Plain-text Q&A setup mode for SSH, Docker, and small-terminal environments — no TUI required
+
+---
+
+## [2.3.11] - 2026-02-26
+
+### Added
+- **Headless environment support**: Automatically detects SSH, Docker, and display-less environments
+- **PAT login for headless servers**: "Login with Access Token" shown as primary option on headless servers
+- **`PLUGINATOR_API_TOKEN` env var**: Set this to authenticate automatically on startup (ideal for CI/Docker)
+- **OAuth URL display**: When a browser can't be opened, the OAuth dialog shows the URL for manual copy-paste
+
+---
+
+## [2.3.10] - 2026-02-26
+
+### Changed
+- **Cross-platform color consistency**: All UI colors now use theme tokens instead of named ANSI colors, ensuring consistent appearance across macOS, Linux, and Windows terminals
+
+---
+
+## [2.3.9] - 2026-02-26
+
+### Fixed
+- **ReDoS protection**: Invalid regex patterns in `--grep` now fall back to literal matching instead of crashing
+- **Download size limit**: HTTP downloads capped at 500 MB to prevent unbounded memory consumption
+- **Health stability score**: Placeholder changed from misleading "100" to "50" to reflect unimplemented status
+
+---
+
 ## [2.3.8] - 2026-02-25
 
 ### Added
