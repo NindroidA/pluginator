@@ -35,26 +35,49 @@ jobs:
             VERSION="v${VERSION:-Latest}"
           fi
 
-          # Extract the latest changelog section (between first and second version headers)
-          # Skips [Unreleased], captures ### sections and their content
-          CHANGELOG=$(awk '
-            BEGIN { found=0; in_section=0 }
-            /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {
-              if (found) exit;
-              found=1;
-              next;
-            }
-            found && /^### / {
-              in_section=1;
-              print;
-              next;
-            }
-            found && in_section && /\S/ { print }
-          ' docs/CHANGELOG.md)
+          # Strip v prefix for matching in the changelog file
+          MATCH_VERSION="${VERSION#v}"
+
+          # Extract changelog section for the specific version
+          # When a version is specified, find that exact section
+          # When auto-detecting, use the first versioned section
+          if [ -n "${INPUT_VERSION}" ]; then
+            CHANGELOG=$(awk -v ver="$MATCH_VERSION" '
+              BEGIN { found=0; in_section=0 }
+              /^## \[/ {
+                if (found) exit;
+                if (index($0, "[" ver "]") > 0) {
+                  found=1;
+                  next;
+                }
+              }
+              found && /^### / {
+                in_section=1;
+                print;
+                next;
+              }
+              found && in_section && /\S/ { print }
+            ' docs/CHANGELOG.md)
+          else
+            CHANGELOG=$(awk '
+              BEGIN { found=0; in_section=0 }
+              /^## \[[0-9]+\.[0-9]+\.[0-9]+\]/ {
+                if (found) exit;
+                found=1;
+                next;
+              }
+              found && /^### / {
+                in_section=1;
+                print;
+                next;
+              }
+              found && in_section && /\S/ { print }
+            ' docs/CHANGELOG.md)
+          fi
 
           # Validate changelog extraction
           if [ -z "$CHANGELOG" ]; then
-            echo "::warning::No changelog content extracted, using placeholder"
+            echo "::warning::No changelog content found for ${VERSION} in docs/CHANGELOG.md"
             CHANGELOG="See the full changelog for details."
           fi
 
