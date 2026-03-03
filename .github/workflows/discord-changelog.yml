@@ -56,7 +56,7 @@ jobs:
                 print;
                 next;
               }
-              found && in_section && /\S/ { print }
+              found && in_section && NF { print }
             ' docs/CHANGELOG.md)
           else
             CHANGELOG=$(awk '
@@ -71,7 +71,7 @@ jobs:
                 print;
                 next;
               }
-              found && in_section && /\S/ { print }
+              found && in_section && NF { print }
             ' docs/CHANGELOG.md)
           fi
 
