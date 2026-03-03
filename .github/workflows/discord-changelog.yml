@@ -83,21 +83,17 @@ jobs:
 
           # Random subheader quotes
           QUOTES=(
-            "Your plugins just leveled up!"
-            "Fresh jars, hot off the press!"
+            "Fresh jars, hot off the machine!"
             "Plugin management just got better!"
-            "Beep boop, new features deployed!"
-            "Another update, another W"
-            "Keeping your server fresh since 2026"
+            "Yippee! New updates!"
             "Plugins go brrrrrrr"
-            "New tools in the toolbox!"
-            "Shiny new things ahead!"
+            "King of the plugins, king of the plugins"
+            "New tools in the toolbox"
+            "Shiny new tools"
             "The plugin whisperer strikes again"
-            "Server admin life made easier"
-            "Update o'clock!"
-            "More features? Yes please!"
             "Crafting a better plugin experience"
-            "Your server called — it wants these updates"
+            "Your server called, it wants these updates"
+            "Boof."
           )
           QUOTE="${QUOTES[$((RANDOM % ${#QUOTES[@]}))]}"
 
