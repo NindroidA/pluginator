@@ -7,10 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.19] - 2026-03-03
+
+### Changed
+- **Better plugin sources**: Optimized download sources for 24 plugins — many plugins that previously relied on the unreliable Spiget API now use Modrinth, Hangar, or GitHub for faster, more reliable downloads
+  - Fewer plugins should show as "manual download" when automatic updates are available
+  - 2 previously unsourced plugins (PlayerHeads, LibsDisguises) now have download sources
+  - All original Spigot sources kept as fallback — nothing removed, only improved
+
+---
+
 ## [2.3.18] - 2026-03-02
 
 ### Fixed
 - **Auto-updater broken**: Update checking now works reliably — switched from GitHub Releases API (which returned errors) to the npm registry where all versions are published
+- **Version detection**: Fixed the updater reporting version `0.0.0` instead of the actual installed version in bundled builds
 - **Update command**: Streamlined update instructions to show only the update command or download link
 
 ---
