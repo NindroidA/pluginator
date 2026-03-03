@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.20] - 2026-03-03
+
+### Fixed
+- **Version detection**: Fixed the updater always reporting version `0.0.0` instead of the actual installed version — update notifications now show the correct version
+- **Plugin source persistence**: Fixed paid/premium plugins losing their "manual download" status after saving — plugins that should show in the "Manual Updates Available" section now stay correctly categorized
+
+---
+
 ## [2.3.19] - 2026-03-03
 
 ### Changed
