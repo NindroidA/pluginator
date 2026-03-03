@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.2] - 2026-03-03
+
+### Fixed
+- **Update checks finally accurate**: After downloading a plugin update, the Updates tab now correctly shows it as up-to-date instead of still reporting it needs updating
+- **Health score now reaches 100%**: Fixed health scores capping at 96.3 even when there are zero issues — plugins with no compatibility data are no longer penalized
+- **Server JAR dialog display**: Fixed unicode bullet characters showing as raw text (`\u2022`) instead of rendering properly
+- **Discord changelog announcements**: Changelog updates to Discord now trigger automatically when new versions are synced, fixing the empty announcement issue
+
+---
+
 ## [2.4.1] - 2026-03-03
 
 ### Added
