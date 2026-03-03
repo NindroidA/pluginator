@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] - 2026-03-03
+
+### Added
+- **Per-server Minecraft versions**: You can now set separate Minecraft versions for your production and test servers (`PROD_MC_VERSION` and `TEST_MC_VERSION`). The old `MINECRAFT_VERSION` setting is automatically migrated
+- **Config editor improvements**:
+  - MC version fields now show a version picker instead of requiring manual text entry
+  - Number fields support left/right arrow keys for quick increment/decrement
+  - Each field shows a helpful description when selected
+
+### Fixed
+- **Auto-source command**: Running `/auto-source` multiple times no longer reports "sources updated" when sources already match — it correctly shows them as already assigned
+- **Config editor reliability**: Fixed boolean toggle reading the wrong field value, and fixed options list mutation between sessions
+
+---
+
 ## [2.3.20] - 2026-03-03
 
 ### Fixed
