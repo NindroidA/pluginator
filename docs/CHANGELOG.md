@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.18] - 2026-03-02
+
+### Fixed
+- **Auto-updater broken**: Update checking now works reliably — switched from GitHub Releases API (which returned errors) to the npm registry where all versions are published
+- **Update command**: Streamlined update instructions to show only the update command or download link
+
+---
+
 ## [2.3.17] - 2026-03-02
 
 ### Added
