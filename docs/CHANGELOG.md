@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.1] - 2026-03-03
+
+### Added
+- **Auto-update on startup**: Pluginator now automatically checks for and installs updates before launching — no more manual update commands needed
+
+### Fixed
+- **Server JAR downloads**: Server JAR downloads now correctly go to your test server directory instead of production
+- **Update checks**: The Updates tab now only shows plugins installed on your test server, keeping your production server untouched
+- **Health score accuracy**: Fixed health scores showing 91 instead of 100 when there are no actual issues
+
+---
+
 ## [2.4.0] - 2026-03-03
 
 ### Added
