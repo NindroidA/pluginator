@@ -1,6 +1,6 @@
 name: General Feedback
 description: Share feedback, suggestions, or questions about Pluginator
-labels: ["feedback", "triage"]
+labels: ["feedback"]
 body:
   - type: markdown
     attributes:
