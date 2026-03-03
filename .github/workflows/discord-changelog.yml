@@ -1,6 +1,10 @@
 name: Discord Changelog Update
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/CHANGELOG.md'
   workflow_dispatch:
     inputs:
       version:
