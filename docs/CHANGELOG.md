@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.19] - 2026-03-05
+
+### Fixed
+- **Empty release notes**: Release notes now properly include changelog content for each version
+- **Discord announcement timing**: Discord announcements now wait for docs to sync before sending, ensuring the changelog is up to date
+- **Release artifacts missing**: Fixed an issue where release files could be lost during the build process
+
+### Improved
+- **Release pipeline organization**: Cleaner workflow structure with package managers grouped together
+
+---
+
 ## [2.4.18] - 2026-03-05
 
 ### Fixed
