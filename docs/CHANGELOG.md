@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.18] - 2026-03-05
+
+### Fixed
+- **Duplicate Discord announcements**: Release announcements no longer send twice
+
+### Improved
+- **Automatic release cleanup**: Old release binaries are now automatically pruned (keeping the latest 3), so the releases page stays clean
+
+---
+
+## [2.4.17] - 2026-03-05
+
+### Fixed
+- **4-digit version detection**: Plugins using 4+ segment versions (like CMI and CMILib) are now properly detected as having updates available
+
+---
+
 ## [2.4.16] - 2026-03-05
 
 ### Fixed
