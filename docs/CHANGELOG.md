@@ -7,6 +7,121 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.16] - 2026-03-05
+
+### Fixed
+- **Reliability improvements**: Fixed several edge cases in cache management, API URL validation, and navigation index handling identified during comprehensive code review
+- **React best practices**: Moved side effects out of state updater functions in tab navigation
+
+---
+
+## [2.4.15] - 2026-03-05
+
+### Improved
+- **Expanded test coverage**: Added comprehensive tests for the web manifest plugin source and extracted navigation utilities for better testability
+
+---
+
+## [2.4.14] - 2026-03-04
+
+### Improved
+- **Expanded test coverage**: Added comprehensive tests for the Modrinth plugin source and HTTP client, covering API responses, error handling, caching, retry logic, and security validations
+
+---
+
+## [2.4.13] - 2026-03-04
+
+### Improved
+- **Internal code organization**: Consolidated UI overlay state management into a dedicated module, making the codebase easier to maintain and extend
+
+---
+
+## [2.4.12] - 2026-03-04
+
+### Fixed
+- **Smarter version comparison**: Pre-release versions (like SNAPSHOT, alpha, beta, rc) are now correctly identified as older than the full release. Build numbers (like -b131, -rev42) continue to be treated as equal to the base version.
+
+---
+
+## [2.4.11] - 2026-03-04
+
+### Improved
+- **Internal code cleanup**: Consolidated duplicate caching system into a single, more efficient cache with better statistics and smarter eviction. Cleaned up redundant code in the GitHub update checker.
+
+---
+
+## [2.4.10] - 2026-03-04
+
+### Improved
+- **Better keyboard experience**: Arrow key navigation stays active while data is loading, so you don't lose your position
+- **Clearer home screen**: Update status display is more readable, and keyboard hints now show more shortcuts across two rows
+- **Improved command search**: Commands like 'sources' and 'performance' are now easier to find with additional search keywords
+
+---
+
+## [2.4.9] - 2026-03-04
+
+### Performance
+- **Faster update checks**: Modrinth and Bukkit version filtering is now more efficient, and Spigot API calls run in parallel instead of one at a time
+- **Smarter caching**: Source cache now keeps frequently-used entries longer (LRU eviction), and plugin JAR lookups are cached to avoid re-scanning directories
+
+---
+
+## [2.4.8] - 2026-03-04
+
+### Quality
+- **Expanded test coverage**: Added 40 new tests for critical security and infrastructure modules — API URL validation and server management now have comprehensive test suites
+
+---
+
+## [2.4.7] - 2026-03-04
+
+### Improved
+- **Better empty states**: Plugin list and dependency graph views now show helpful context-specific messages when there's nothing to display, guiding you to scan or configure
+- **Stale cache warning**: When some update checks fail due to API errors and use cached results instead, you'll now see a clear notification so you know which results may be outdated
+
+---
+
+## [2.4.6] - 2026-03-04
+
+### Improved
+- **Config typo detection**: Pluginator now warns you if your config file has unrecognized keys and suggests the correct name — no more silently ignored settings
+- **Safer downloads**: Plugin downloads now use atomic file writes — if something goes wrong mid-download, your existing plugin files stay intact
+- **Extended security**: GeyserMC downloads now have the same URL safety checks as other sources
+
+---
+
+## [2.4.5] - 2026-03-04
+
+### Security
+- **Tighter tier enforcement**: Usage limits are now enforced locally when the server is unreachable, preventing bypass via network blocking
+- **Hardened API connections**: All internal API connections are now validated against SSRF attacks — pointing Pluginator at a fake server no longer bypasses limits
+- **Safer downloads**: Plugin download URLs from external sources are now validated before use, and download streams have a 500MB size cap
+
+---
+
+## [2.4.4] - 2026-03-04
+
+### Added
+- **More commands actually work**: `/clearfilters`, `/rollback`, `/exportcache`, and `/schedule:status` now do what they say instead of silently doing nothing
+- **Stay logged in longer**: Your session now auto-refreshes every 12 hours while the app is running, so you won't randomly get logged out during long sessions
+
+---
+
+## [2.4.3] - 2026-03-04
+
+### Fixed
+- **Downloads actually work now**: After downloading plugin updates, the Updates tab no longer incorrectly shows them as still needing updates
+- **Manual-only plugins don't get stuck**: Plugins that can only be downloaded manually no longer leave phantom selections in the updates list
+- **Update command works**: Both the CLI `pluginator update` and the in-app `/update` command now actually install updates instead of just printing instructions
+
+### Changed
+- **Smoother gradient animation**: The premium text shimmer effect now uses a clean linear sweep instead of random spot placement — much smoother and more consistent across terminals
+- **Stay logged in**: Your login session now persists across app restarts (previously logged you out after 24 hours even if the session was still valid)
+- **Exit replaces Quit**: The command palette now says "Exit" instead of "Quit" (typing `/quit` still works)
+
+---
+
 ## [2.4.2] - 2026-03-03
 
 ### Fixed
