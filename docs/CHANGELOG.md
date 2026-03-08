@@ -7,11 +7,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.9] - 2026-03-07
+
+### Changed
+- **Code quality**: Refactored large functions for better maintainability, cleaned up deprecated error classes, improved error logging
+
+---
+
+## [2.5.8] - 2026-03-07
+
+### Changed
+- **Code quality**: Resolved circular dependency cycles for improved module loading and bundling
+
+---
+
+## [2.5.7] - 2026-03-07
+
+### Changed
+- **Code cleanup**: Removed dead code, unused imports, and deprecated internal APIs for improved maintainability
+
+---
+
+## [2.5.6] - 2026-03-07
+
+### Fixed
+- **Improved input validation**: Better error handling when importing saved searches from corrupted or malformed data
+
+---
+
+## [2.5.5] - 2026-03-07
+
+### Fixed
+- **Plugin registry cleanup**: Fixed inconsistencies between registry data sources that could cause plugin download and update failures. Removed 9 broken plugin entries and added 23 missing ones
+- **Improved test reliability**: Fixed flaky usage tracking tests
+
+---
+
+## [2.5.4] - 2026-03-06
+
+### Security
+- **Subscription expiry hardening**: Expiry checks now use server-verified timestamps, preventing clock manipulation from extending expired subscriptions
+
+---
+
+## [2.5.3] - 2026-03-06
+
+### Security
+- **Concurrent access protection**: Usage tracking now uses exclusive file locking to prevent data corruption when multiple instances run simultaneously
+
+### Added
+- **Template download limits**: New tier-based limits for template downloads (3/day free, 10/day plus, 50/day pro, unlimited max)
+
+## [2.5.2] - 2026-03-06
+
+### Security
+- **Usage file integrity protection**: Local usage tracking files are now cryptographically signed, preventing tampering
+
+## [2.5.1] - 2026-03-06
+
+### Security
+- **Hardened API configuration**: Internal API settings are now locked to production defaults, preventing configuration bypass
+
+---
+
+## [2.5.0] - 2026-03-06
+
+### Added
+- **Auto-update**: New auto-update command (CLI: `pluginator auto-update`, UI: command palette) that automatically scans, checks, and downloads all available plugin updates in one step
+- **Auto-update UI**: Live progress view with phase indicators during auto-update, and a categorized summary when complete
+- **Manual download export** (Plus+): Export a Markdown checklist of plugins requiring manual download — press E in the summary dialog or use `--export-manual` on the CLI
+- **Download summary dialog**: After batch plugin downloads, a summary dialog shows what was downloaded, what failed, and what needs manual download
+- **Command presets**: Filter the command palette to show basic, intermediate, or advanced commands based on your preference
+- **Tab visibility**: Show or hide individual tabs to customize your workspace
+- **Per-host concurrency**: Smarter API rate limiting per hostname, faster parallel scanning and downloads
+
+### Changed
+- **Command renames**: Clearer command names — `selfupdate` for Pluginator updates, improved descriptions throughout
+- **Download speed**: Bumped concurrent downloads from 2 to 5
+
+### Fixed
+- **Dependency array fixes**: Fixed stale references in keyboard shortcut handlers
+
+---
+
 ## [2.4.19] - 2026-03-05
 
 ### Fixed
 - **Empty release notes**: Release notes now properly include changelog content for each version
-- **Discord announcement timing**: Discord announcements now wait for docs to sync before sending, ensuring the changelog is up to date
+- **Discord announcements**: Discord messages are now sent directly from the release pipeline, fixing a race condition that caused empty or missing announcements
 - **Release artifacts missing**: Fixed an issue where release files could be lost during the build process
 
 ### Improved
