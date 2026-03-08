@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.10] - 2026-03-07
+
+### Fixed
+- **Citizens auto-update**: Fixed 404 error when auto-updating Citizens plugin by switching to Jenkins CI source
+- **Updates view refresh**: Updates tab now properly refreshes after checking for updates and after auto-update completes
+
+---
+
 ## [2.5.9] - 2026-03-07
 
 ### Changed
