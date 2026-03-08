@@ -7,11 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.11] - 2026-03-08
+
+### Fixed
+- **Auto-source matching**: Improved plugin name matching so plugins with extended names (e.g., "AxiomPaperPlugin") correctly match their registry entries (e.g., "AxiomPaper"). Previously some plugins showed as "no source configured" despite having entries in the curated registry
+- **Auto-update data persistence**: Auto-update was reading plugin configs from the wrong file, causing previously assigned sources to be lost on every run. Sources now persist correctly between auto-update runs
+- **Premium plugin downloads**: Fixed premium/paid plugins from registry not being correctly flagged for manual download
+
+---
+
 ## [2.5.10] - 2026-03-07
 
 ### Fixed
 - **Citizens auto-update**: Fixed 404 error when auto-updating Citizens plugin by switching to Jenkins CI source
 - **Updates view refresh**: Updates tab now properly refreshes after checking for updates and after auto-update completes
+- **Premium plugin downloads**: Fixed premium/paid plugins incorrectly attempting auto-download instead of showing manual download instructions
 
 ---
 
