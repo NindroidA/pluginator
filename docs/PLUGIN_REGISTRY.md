@@ -1,14 +1,33 @@
 # Plugin Registry System
 
-> **Last Updated:** February 21, 2026
+> **Last Updated:** April 30, 2026
 
 ## Overview
 
-The plugin registry provides quick access to 100+ popular Minecraft plugins with pre-configured source identifiers. Instead of manually entering Spigot resource IDs or Modrinth slugs, you can simply search for a plugin by name. The full registry is served via the NinSys API, with 41 plugins bundled locally as a fallback.
+The plugin registry provides quick access to 100+ popular Minecraft plugins with pre-configured source identifiers. Instead of manually entering Spigot resource IDs or Modrinth slugs, you can simply search for a plugin by name. The full registry is served via the NinSys API, with **123 plugins bundled locally** as a fallback (see breakdown below).
 
 ## Curated Registry (Bundled)
 
-The bundled registry at `data/defaults/plugin-registry.json` contains pre-configured popular plugins with verified source identifiers.
+The bundled registry at [data/defaults/plugin-registry.json](data/defaults/plugin-registry.json) contains pre-configured popular plugins with verified source identifiers.
+
+### Category Breakdown
+
+| Category | Count |
+|----------|-------|
+| gameplay | 21 |
+| admin | 19 |
+| utility | 19 |
+| world | 11 |
+| library | 10 |
+| protection | 9 |
+| cosmetic | 8 |
+| economy | 8 |
+| performance | 5 |
+| chat | 4 |
+| minigames | 4 |
+| social | 3 |
+| permissions | 2 |
+| **Total** | **123** |
 
 ### Included Plugins
 
@@ -34,11 +53,11 @@ The bundled registry at `data/defaults/plugin-registry.json` contains pre-config
 | ViaVersion | utility | Modrinth, Spigot, GitHub |
 | Chunky | utility | Modrinth, Spigot |
 | Geyser | utility | Modrinth |
-| *...and 80+ more* | | |
+| *...and 100+ more* | | |
 
 ## Custom Registry (User)
 
-Add your own plugins to `~/.pluginator/custom-registry.json`:
+Add your own plugins to [~/.pluginator/custom-registry.json](~/.pluginator/custom-registry.json) — this overlay is merged on top of the bundled registry at load time:
 
 ```json
 {
@@ -153,14 +172,17 @@ interface RegistryPlugin {
 
 ### Source Types
 
-| Type | Identifier Format | Example |
-|------|-------------------|---------|
-| `modrinth` | Project slug | `luckperms` |
-| `spigot` | Resource ID | `28140` |
-| `hangar` | Project slug | `LuckPerms` |
-| `github` | owner/repo | `LuckPerms/LuckPerms` |
-| `curseforge` | Project ID | `12345` |
-| `jenkins` | job path | `LuckPerms/job/main` |
+| Type | Identifier Field | Example |
+|------|------------------|---------|
+| `modrinth` | `projectSlug` | `luckperms` |
+| `spigot` | `resourceId` (number) | `28140` |
+| `hangar` | `hangarSlug` | `LuckPerms` |
+| `github` | `repoSlug` | `LuckPerms/LuckPerms` |
+| `curseforge` | `curseforgeId` | `307962` |
+| `jenkins` | `jenkinsJob` + `jenkinsUrl` | `LuckPerms` + `https://ci.lucko.me` |
+| `bukkit` | (legacy, scrape-based) | resource page URL |
+| `geysermc` | hardcoded GeyserMC project | `geyser` |
+| `web` | manifest URL (in `sources.json`) | `https://example.com/manifest.json` |
 
 ## Preferred Source Selection
 

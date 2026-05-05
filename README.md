@@ -11,17 +11,17 @@ A powerful Minecraft server plugin manager with multi-source update checking, sy
 ## Features
 
 ### Core
-- **Multi-Source Updates** — Check updates from Spigot, Modrinth, GitHub, CurseForge, Hangar, Jenkins, and custom web manifests
+- **Multi-Source Updates** — Check updates from Spigot, Modrinth, GitHub, Hangar, Bukkit, Jenkins, GeyserMC, and custom web manifests (8 source types)
 - **Server Sync** — Synchronize plugins between production and test servers
-- **Smart Backups** — Timestamped tar.gz backups with automatic cleanup
+- **Smart Backups** — Timestamped tar.gz backups with automatic cleanup, atomic writes, and crash recovery
 - **Modern Terminal UI** — Interactive, keyboard-driven interface with 9 tabs and customizable themes
-- **Plugin Registry** — 100+ popular plugins pre-configured with verified sources
+- **Plugin Registry** — 120+ popular plugins pre-configured with verified sources
 - **Auto-Updater** — Automatic update checking with one-command updates
 - **Checksum Verification** — SHA-256 verification for all downloads
 
 ### Analytics & Health
-- **Health Dashboard** — Plugin health scoring based on compatibility, security, and update status
-- **Performance Analytics** — Server performance monitoring with metrics and alerts
+- **Health Dashboard** — 5-component health scoring (compatibility, security, version, maintenance, dependencies) with A+/F grading
+- **Performance Analytics** — Server performance monitoring with metrics collection and alerts
 - **Recommendations Engine** — Smart plugin recommendations based on your setup
 - **Server Panel Integrations** — Connect to AMP, Pterodactyl, Crafty Controller, and MCSManager
 
@@ -31,6 +31,22 @@ A powerful Minecraft server plugin manager with multi-source update checking, sy
 - **Scheduled Updates** — Configure automatic update windows with major version handling
 - **Data Import/Export** — Export and import plugin configurations
 - **Widget Dashboard** — Customizable dashboard with health, analytics, and streaming widgets
+- **Plugin Notes** — Attach notes to individual plugins
+- **Notification History** — Persistent toast log accessible via `/notifications`
+- **Post-Action Hooks** — Run user-configured shell commands after sync/download/backup/migrate
+
+### Power-User
+- **Command Palette** — 80+ commands accessible via `:` or `/` with fuzzy search
+- **Vim Mode** — Optional modal navigation (Plus+) with motions, marks, search, and macros
+- **Jump List** — `Ctrl+o` / `Ctrl+i` to navigate between recent positions
+- **Quick Actions** — `Ctrl+P` for context-aware quick actions
+- **Custom Keybindings** — 5 presets (default, vim, emacs, minimal, custom) with full inheritance
+
+### Security
+- **SSRF Protection** — Blocks private-IP and metadata-endpoint URLs by default
+- **Atomic File Writes** — Crash-safe writes for cache, config, and journal files
+- **Operation Journal** — Records destructive operations with crash recovery on next launch
+- **PID Locks** — File-based exclusive locks prevent concurrent operations
 
 ## Installation
 
@@ -48,7 +64,7 @@ A powerful Minecraft server plugin manager with multi-source update checking, sy
 
 ```bash
 # macOS (Homebrew)
-brew tap nindroida/pluginator && brew install pluginator
+brew tap NindroidA/pluginator && brew install pluginator
 
 # Windows (Scoop)
 scoop bucket add pluginator https://github.com/NindroidA/scoop-pluginator && scoop install pluginator
@@ -59,6 +75,8 @@ npm install -g @nindroidsystems/pluginator
 # Bun (any platform)
 bun install -g @nindroidsystems/pluginator
 
+# curl | bash (Linux/macOS)
+curl -fsSL https://raw.githubusercontent.com/NindroidA/pluginator/main/scripts/install.sh | bash
 ```
 
 See [Installation Guide](docs/INSTALLATION.md) for detailed instructions.
@@ -76,6 +94,7 @@ pluginator
 pluginator scan --prod          # Scan production server
 pluginator check-updates        # Check for plugin updates
 pluginator sync                 # Sync prod to test
+pluginator self-update          # Update Pluginator itself
 ```
 
 ## Keyboard Shortcuts
@@ -83,7 +102,9 @@ pluginator sync                 # Sync prod to test
 | Key | Action |
 |-----|--------|
 | `1-9` | Switch tabs (Home/Servers/Plugins/Updates/Logs/Stats/Health/Recs/Perf) |
-| `:` or `/` | Open command palette (25+ commands) |
+| `:` or `/` | Open command palette (80+ commands) |
+| `Ctrl+P` | Quick actions menu |
+| `Ctrl+O` / `Ctrl+I` | Jump back/forward (history) |
 | `j` / `k` or `↑` / `↓` | Navigate lists |
 | `g` / `G` | Jump to top/bottom |
 | `?` | Show help |
@@ -91,14 +112,14 @@ pluginator sync                 # Sync prod to test
 
 ## Tier System
 
-| Tier | Price | Checks/Day | Downloads/Day |
-|------|-------|------------|---------------|
-| Free | $0 | 10 | 5 |
-| Plus | $14.99 (one-time) | 50 | 25 |
-| Pro | $4.99/mo | 100 | 50 |
-| Max | $9.99/mo | Unlimited | Unlimited |
+| Tier | Price | Update Checks/Day | Downloads/Day | Tabs |
+|------|-------|---|---|---|
+| Free | $0 | 1 | 5 | Home/Plugins/Updates only |
+| Plus | $9.99 (one-time) | 50 | 25 | + Servers/Logs/Stats |
+| Pro | $2.99/mo or $24.99/yr | 100 | 50 | + Health/Recs/Perf, scheduling, vim mode |
+| Max | $4.99/mo or $44.99/yr | Unlimited | Unlimited | All features, priority support |
 
-See [Tier System](docs/TIER_SYSTEM.md) for details.
+Plus owners get discounted upgrades ($1.99/mo Pro, $3.99/mo Max). See [Tier System](docs/TIER_SYSTEM.md) for full details.
 
 ## Documentation
 
@@ -107,6 +128,7 @@ See [Tier System](docs/TIER_SYSTEM.md) for details.
 - [Commands Reference](docs/COMMANDS.md) — Full command palette reference
 - [Plugin Registry](docs/PLUGIN_REGISTRY.md) — Curated plugin database
 - [Tier System](docs/TIER_SYSTEM.md) — Subscription tiers and features
+- [Troubleshooting](docs/TROUBLESHOOTING.md) — Common issues and fixes
 - [Error Codes](docs/ERROR_CODES.md) — Error code reference (PLG-NNNN)
 - [Security](docs/SECURITY.md) — Security policy and reporting
 - [Changelog](docs/CHANGELOG.md) — Version history

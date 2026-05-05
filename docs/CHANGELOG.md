@@ -7,6 +7,201 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.11.46-2.11.61] - 2026-04-30
+
+### Fixed
+- **Plugin lists no longer "stack on top of each other"**: The long-running bug where rows in the Plugins, Servers, Updates, and Health views would visually overlap, leaving gaps or hiding plugins in the same spot every time, is finally fixed. Lists now render exactly one row per terminal line with no overflow
+- **Plugins disappearing from the list in the same spot**: Long plugin names are now properly truncated to fit their column instead of wrapping onto a second line and pushing the next plugin off-screen
+- **Items disappearing momentarily during scroll**: Scrollbar no longer flickers when scrolling through long lists
+- **Servers tab cursor "vanishing" on section headers**: Up/down navigation now skips section headers cleanly. Pressing UP at the first item correctly wraps around to the last item
+- **Plugin scan returning 0 plugins after setup**: Fixed several issues that caused the home screen to show "0 plugins" after a fresh setup or after opening certain dev dialogs. Scans now reliably display the correct counts
+- **Setup wizard crash on Tab to browse**: The setup wizard no longer crashes with a "no such file or directory" error when you press Tab to browse for a server folder that doesn't exist yet — it now lands on the nearest existing parent folder
+- **Hangar source missing from production builds**: Plugins configured to use Hangar (the PaperMC plugin marketplace) now work correctly in the standard CLI; previously only dev-mode users could use Hangar
+- **Logger no longer crashes the app on permission errors**: If log files have unexpected permissions, the logger now self-heals instead of bubbling errors up and breaking plugin scans
+
+### Improved
+- **Tighter command palette layout**: Names and descriptions now align in clean columns instead of being separated by a giant gap
+- **Cleaner dev tools panel**: Better spacing for badges, shortcut hints, and the debug marker dialog
+
+---
+
+## [2.11.10] - 2026-04-26
+
+### Fixed
+- **CLI `pluginator schedule` tier check**: The schedule command now correctly enforces the Pro tier requirement, matching the UI's behavior
+- **Quick actions and search results respect tier locks**: Running a tier-gated command via search results or the quick actions dialog now shows the upgrade hint instead of silently bypassing the gate
+
+---
+
+## [2.10.0] - 2026-04-21
+
+### Improved
+- **Better error reporting during batch operations**: Batch downloads and update checks now use Promise.allSettled so a single failure no longer cancels the rest of the batch — you'll get more complete results and clearer error reporting
+
+---
+
+## [2.9.1] - 2026-04-20
+
+### Added
+- **Notification history**: All toast notifications are now saved to `~/.pluginator/notifications.json` so you can review past alerts even after they fade. Open the new notifications view via the `/notifications` command
+- **Post-action hooks**: Configure shell commands to run automatically after sync, download, backup, update-check, and migrate operations — useful for restarting servers, sending Discord messages, or triggering custom workflows. Configure in `~/.pluginator/hooks.json`
+
+### Changed
+- **Cleaner reset commands**: `refresh` is now `rescan` and `clear-cache` is now `clear-api-cache` for clarity. The old names still work as hidden aliases
+
+---
+
+## [2.9.0] - 2026-04-12
+
+### Added
+- **Startup tips on the Home view**: 20 rotating, tier-aware tips help you discover features you might not know about
+- **Plugin notes**: Add personal notes to any plugin (e.g., "needed for Discord bridge", "remove when MC 1.22 ships"). Notes show in the plugin detail panel and persist between scans
+- **Config file sync**: A new system for discovering, diffing, and syncing plugin YAML/JSON config files between your prod and test servers — keep tweaks consistent without copy-pasting
+- **Tab-level tier gating**: Servers and Logs tabs are now gated by tier with clear upgrade prompts
+
+### Changed
+- **Tier pricing overhaul**: Tighter Free tier limits to better differentiate from paid tiers; centralized tier pricing constants for consistency
+
+---
+
+## [2.8.0-2.8.3] - 2026-04-12
+
+### Added
+- **Crash recovery**: Pluginator now writes an operation journal before destructive operations (sync, migrate, backup, download). If the app crashes mid-operation, the next launch detects the incomplete journal entry and reports it
+- **Stale lock detection**: PID lock files prevent two Pluginator processes from running destructive operations simultaneously. Stale locks from crashed processes are auto-detected and cleaned
+- **Startup health check**: The UI now runs a quick health check on launch to detect stale locks, incomplete journals, and corrupted config files — auto-resolving what it can and reporting the rest
+
+### Security
+- **SSRF protection**: Added a blocklist preventing outbound requests to internal/private IPs (localhost, 10.x, 192.168.x, 169.254.x, etc.) so a malicious plugin URL can't probe your local network
+- **Atomic file writes**: All config files (preferences, scan cache, themes, server data, schedules, backups) now use atomic write-then-rename to prevent corruption if the app crashes mid-save
+- **JAR copy safety**: Sync and migrate operations now write to a temporary file first then atomically rename, preventing partial JARs on disk if a copy fails mid-stream
+- **Migrate timeouts**: Added a 30-second timeout to migrate file copies, matching sync behavior — prevents indefinite hangs on slow filesystems
+- **Stale temp cleanup**: Pluginator now cleans up orphaned `.tmp` files from previous crashes on startup
+
+### Changed
+- **Graceful shutdown**: Pressing Ctrl+C now releases workflow locks and cleans temp files before exiting
+
+---
+
+## [2.7.28-2.7.35] - 2026-04-08
+
+### Added
+- **Multi-pattern animated gradient title**: The animated gradient on titles now cycles through 4 patterns (sweep, wave, pulse, sparkle) every ~20 seconds for a more varied feel
+- **Workflow concurrency locks**: Backup create/restore and download batch operations now acquire an exclusive lock, matching sync/migrate. You can no longer accidentally run two destructive operations at once
+
+### Improved
+- **Sharper header spacing**: Added a horizontal divider between the title and tab bar, and the active tab underline now matches the full label width
+- **Cleaner Unicode rendering**: Fixed raw escape sequences appearing instead of checkmarks in HomeView and StatsView
+- **Steadier progress bars**: Stats view progress and health bars no longer animate unnecessarily — only the title gradient does
+- **Smarter command palette truncation**: Long descriptions truncate intelligently with terminal-width-aware column sizing
+
+---
+
+## [2.7.16-2.7.27] - 2026-04-07
+
+### Added
+- **Visual selection mode**: Press `v` in any list view to start a vim-style range selection. Navigate to extend the selection, Enter to confirm, Esc to cancel
+- **Inline confirm prompts**: Low-risk reversible actions now use a lightweight `[Y/n]` prompt instead of a full confirmation dialog
+- **Terminal capability detection**: Pluginator now auto-detects whether your terminal supports box drawing, Braille, emoji, and full color, and gracefully falls back to ASCII characters when needed
+
+### Changed
+- **Logs view overhaul**: Severity-colored level badges, expandable error entries with tree-style detail lines, color-coded duration suffixes, separate empty states for debug-on/off/no-match
+- **Stats view overhaul**: Prominent health gauge with grade label (A+/A/B/C/D/F), responsive grid layout, horizontal source-distribution bar charts
+- **Health Dashboard overhaul**: Grade-colored health gauge in a panel, inline summary counts, danger-variant panel for critical issues, scrollbar-equipped plugin table
+- **Loading screen redesign**: Premium double-bordered centered layout with progress bar, version, and BETA badge inside the box
+- **Setup wizard redesign**: Wrapped in the new Panel component with embedded title and footer, step counter shown below the indicator
+- **Servers tab redesign**: Plugins now grouped into "In Sync", "Version Mismatch", "Prod Only", "Test Only" sections with readable status labels (`prod newer`, `test newer`, `prod only`, `test only`, `✓`)
+- **All views modernized**: Dashboard, Search Results, Dependency Graph, Compare, Schedule, Config, Registry Browser, Discovery, First-Launch Prompt, and PAT Login now use the unified component system
+
+---
+
+## [2.7.0-2.7.15] - 2026-04-07
+
+### Added
+- **Major UI overhaul**: Pluginator's terminal interface has been redesigned for a more polished, consistent look across every screen
+- **Bordered header and status bar**: Both now use rounded borders matching the rest of the UI for visual symmetry. Mode badges (vim, macro recording, chord pending) appear inline in the status bar
+- **Tab underline indicators**: Active tabs are marked with an underline beneath the label instead of inverse text — works correctly on every terminal theme
+- **Responsive tab labels**: On narrow terminals (<100 cols) tabs abbreviate to short forms like "Plg", "Upd", "Srv"
+- **Strikethrough locked tabs**: Tier-locked tabs now appear with strikethrough + dim color
+- **Panel system**: New unified content panels with embedded titles in top borders and footers in bottom borders — saves vertical space. 5 variants (default/primary/danger/success/info) for color-coded context
+- **Enhanced data table**: New table component with bordered, minimal, and compact variants. Supports auto column sizing, sort indicators, striped rows, responsive column hiding, and inline checkboxes
+- **Dialog overlay system**: Centered modals with embedded titles, footer hints, and variant-colored borders. Buttons show selected/unselected states with shortcut keys
+- **Unified key hints bar**: Replaces 9 different hint implementations across views. Auto-truncates on narrow terminals, shows "+N" for overflow, supports compact-mode abbreviations
+- **Selection accent bar**: New `▌` left accent bar in primary color marks the focused row, visible across every list view
+- **Visual scrollbar**: New scrollbar component shows scroll position with track (`│`) and thumb (`┃`) on the right side of every scrollable list. Auto-hides when content fits
+- **Empty state component**: Centered empty/error states with icon, title, description, and action hints — used across all tabs (plugins, search, servers, updates, logs, health)
+- **Breadcrumb component**: Navigation context trail (e.g., `Plugins (Tab) > EssentialsX (Esc) > Details`) with shortcut labels for drill-down views
+- **Toast notifications**: Stacked toast container with type-specific styling (success/error/warning/info), colored left border, type icon, and configurable max visible
+- **ASCII checkboxes**: Replaced Unicode `☑`/`☐` with terminal-safe `[x]`/`[ ]` for universal compatibility
+
+### Changed
+- **Plugins view**: Text-safe Unicode dot icons colored by source type (replaces emoji), compact `P+T`/`P`/`T` server indicators, accent bar selection, scrollbar, empty states for search/favorites/no-plugins
+- **Updates view**: Panel-wrapped sections (main updates, manual updates, errors), checked time and selected count in the panel title, progress shown in a panel during checks
+- **Home view**: Dashboard with Panel-wrapped Server Status and Updates cards (side-by-side at >=120 cols, stacked below), 3x2 Quick Actions grid replacing the inline suggestion list
+- **Help overlay**: Two-column layout on terminals >=100 cols, underlined section headers, view-specific shortcuts shown alongside global ones
+- **Command palette**: Wrapped in a Panel with category badges (`[wfl]`, `[nav]`, `[cfg]`, `[srv]`, `[plg]`, `[sys]`, `[dbg]`), result count, scrollbar
+- **Progress bars**: Single unified component with `default`/`gradient`/`mini` variants. Auto-color by value (red <33%, yellow 34-66%, green 67%+)
+
+---
+
+## [2.5.16-2.6.7] - 2026-03-08 to 2026-04-07
+
+### Added
+- **Hardened timeouts**: Downloads and file I/O operations now have explicit timeouts so the UI never hangs indefinitely on a slow filesystem or network
+
+### Improved
+- **Faster, more reliable downloads**: Smarter per-host concurrency limits, better error handling for batch operations, surfaced auto-source errors that were previously silent
+- **More accurate plugin matching**: Fixed several edge cases in case-insensitive deduplication, plugin creation validation, and sync path safety
+- **Better progress feedback during sync**: Progress percentages now clamp to 0-100% instead of occasionally showing nonsense values
+
+### Fixed
+- **Stale update results**: Update cache now correctly invalidates when plugin versions change unexpectedly
+- **Notification deduplication**: Repeated toasts now refresh their timestamp instead of getting hidden behind their dedupe window
+- **Various background fixes**: Wired up the circuit breaker for failing API endpoints, automatic cache cleanup, stale `.tmp` file cleanup on startup, GitHub rate limit cap, Modrinth null-safety improvements
+
+---
+
+## [2.5.15] - 2026-03-08
+
+### Added
+- **Plugin detail panel**: Press `i` on any plugin to see all its details — version, authors, website, description, server status, dependencies, source info, JAR file size, and your preferences for it
+- **Server filter**: Press `s` to filter the plugin list by server presence — show only plugins on both servers, prod-only, or test-only
+- **Source type filter**: Press `S` (shift+s) to filter by source — Spigot, Modrinth, GitHub, Jenkins, etc. Active filters show in a bar below the header
+- **Clear filters**: Press `c` to instantly clear all active filters
+
+### Improved
+- **Better help text**: Updates tab now shows clearer instructions for unchecked state, skipped plugins, and manual-download plugins
+- **Status bar shortcuts**: Plugin tab hints updated to reflect new filtering and info shortcuts
+
+---
+
+## [2.5.14] - 2026-03-08
+
+### Improved
+- **Better progress feedback**: Sync, migrate, and backup operations now show a detailed action log instead of just a progress bar. You can see each plugin being processed with its status (copied, skipped, disabled) and an elapsed timer, so you always know what's happening and whether it's stuck
+
+---
+
+## [2.5.13] - 2026-03-08
+
+### Improved
+- **Safer plugin migration**: When migrating plugins to production, removed plugins are now renamed to `.jarDIS` instead of deleted. If something goes wrong, you can find the old JARs with the `.jarDIS` extension and rename them back
+- **Server JAR picker**: When multiple server JARs exist in your test server (e.g., different Minecraft versions), the migration dialog now lets you choose which one to copy. The newest version is auto-selected, and you can switch with left/right arrows
+
+---
+
+## [2.5.12] - 2026-03-08
+
+### Added
+- **Legacy plugin tag**: Abandoned but still downloadable plugins (PermissionsEx, Vault, WorldBorder, NuVotifier, PhantomX) now show as "(legacy)" instead of their source type in the plugins list. This distinguishes them from truly unconfigured "manual" plugins
+
+### Fixed
+- **Registry source audit**: Fixed 7 plugins with broken GitHub sources that would error during update checks (CMILib, RoseStacker, Sentinel, Tebex, VeinMiner, EvenMoreFish, FreedomChat, PlugManX)
+- **AuctionHouse conflict**: Fixed zAuctionHouse being misidentified as generic AuctionHouse plugin
+- **Premium plugin errors**: HeadDatabase, ItemsAdder, and ShopGUI+ now correctly flagged as premium to prevent download errors
+
+---
+
 ## [2.5.11] - 2026-03-08
 
 ### Fixed

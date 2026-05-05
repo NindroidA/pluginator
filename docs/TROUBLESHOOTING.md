@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-> **Last Updated:** February 21, 2026
+> **Last Updated:** April 30, 2026
 
 This guide helps you diagnose and resolve common issues with Pluginator.
 
@@ -16,7 +16,10 @@ pluginator --version
 which pluginator
 
 # Check configuration
-pluginator config
+pluginator list
+
+# Show environment info (paths, mode, version)
+# In the UI: /env
 
 # Enable debug mode
 PLUGINATOR_DEBUG=1 pluginator
@@ -150,6 +153,8 @@ PLUGINATOR_DEBUG=1 pluginator
    rm -rf ~/.pluginator/cache/*
    ```
 
+   Or, from inside the UI, run `/clearcache` (clears API cache only) or `/reset` (clears cache, logs, and session — preserves config).
+
 #### File In Use
 
 **Symptoms:** "EBUSY: resource busy" (Windows) or "Text file busy" (Linux)
@@ -196,10 +201,12 @@ PLUGINATOR_DEBUG=1 pluginator
 1. Check source status:
    - Modrinth: https://status.modrinth.com
    - Spigot: https://www.spigotmc.org
+   - Hangar: https://hangar.papermc.io
+   - GitHub: https://www.githubstatus.com
 
-2. Try alternative source if available
+2. Try an alternative source if available — most plugins are available on multiple sources. Use `/pedit` to switch a plugin's source, or `/auto-source` to re-assign every plugin from the curated registry.
 
-3. Temporarily disable update checking for that plugin
+3. Temporarily disable update checking for that plugin via `/pedit`.
 
 ### UI Errors
 
@@ -322,22 +329,31 @@ jq . ~/.pluginator/config.json
 2. **Wrong path format** - Use forward slashes on all platforms
 3. **Relative paths** - Always use absolute paths
 
-## Debug Context Export
+## Diagnostic Exports
 
-For complex issues, export debug context:
+For complex issues, gather diagnostic data via the in-app commands:
 
 ```bash
-# In the UI, press ':' and type 'debug:export'
-# Or use the command
-pluginator debug-export
+# Show paths, mode, and config locations
+/env
+
+# Show cache statistics (hit/miss ratios, sizes)
+/cachestats
+
+# Export the API cache for inspection
+/exportcache
+
+# Validate every JSON config under ~/.pluginator/
+/validate
 ```
 
-This creates a file in `.debug-context/` with:
-- Environment info
-- Application state
-- Recent actions
-- Error logs
-- Configuration (sensitive values redacted)
+For terminal-only issues, run with debug logging:
+
+```bash
+PLUGINATOR_DEBUG=1 pluginator > pluginator.log 2>&1
+```
+
+Then attach the log when reporting issues. Sensitive values (tokens, salt) are redacted automatically.
 
 ## Platform-Specific Issues
 
@@ -448,17 +464,21 @@ pluginator check-updates --json
 
 ### Q: How do I update Pluginator itself?
 
-A: Run `/update` in the UI or:
+A: Run `/update` in the UI (or `pluginator self-update` from the CLI), or use your install method:
 ```bash
 # npm
-npm update -g pluginator
+npm update -g @nindroidsystems/pluginator
 
 # bun
-bun update -g pluginator
+bun update -g @nindroidsystems/pluginator
 
 # Homebrew
 brew upgrade pluginator
 ```
+
+### Q: I see "Servers" / "Logs" tabs are locked — they used to be free?
+
+A: As of v2.9.0, the Servers and Logs tabs require Plus tier. The locked tabs still appear in the header with a lock icon — pressing the shortcut shows an upgrade notification. The CLI `pluginator logs` command remains available on every tier.
 
 ## See Also
 

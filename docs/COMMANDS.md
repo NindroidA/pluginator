@@ -1,6 +1,6 @@
 # Commands Reference
 
-> **Last Updated:** March 04, 2026
+> **Last Updated:** April 30, 2026
 
 Complete reference for Pluginator's command palette commands (~75 commands).
 
@@ -40,17 +40,17 @@ Open the command palette with `/` or `:`, then type to search. Commands requirin
 | Command | Shortcut | Description | Tier |
 |---------|----------|-------------|------|
 | Go to Home | `/home` | Navigate to home dashboard | Free |
-| Go to Servers | `/servers` | Navigate to servers view | Free |
 | Go to Plugins | `/plugins` | Navigate to plugins list | Free |
-| View Logs | `/logs` | View application debug logs | Free |
 | Show Favorites | `/favorites` | Show only favorite plugins | Free |
 | Universal Search | `/search` | Universal search across plugins, commands, and logs | Free |
+| Go to Servers | `/servers` | Navigate to servers view (side-by-side prod/test) | Plus |
+| View Logs | `/logs` | View application debug logs | Plus |
 | View Stats | `/stats` | View plugin statistics and health metrics | Plus |
 | Health Dashboard | `/health` | View plugin health scores and issues | Pro |
 | Recommendations | `/recs` | View plugin recommendations | Pro |
 | Performance | `/perf` | View server performance analytics | Pro |
-| Jump Back | `/jumpback` | Go to previous location (Ctrl+O) | Free |
-| Jump Forward | `/jumpfwd` | Go to next location (Ctrl+I) | Free |
+| Jump Back | `/jumpback` | Go to previous location (Ctrl+O) | Plus |
+| Jump Forward | `/jumpfwd` | Go to next location (Ctrl+I) | Plus |
 
 ## Workflow Commands
 
@@ -83,6 +83,8 @@ Open the command palette with `/` or `:`, then type to search. Commands requirin
 | Show Config | `/config` | View configuration settings | Free |
 | Edit Config | `/config-edit` | Edit configuration settings interactively | Free |
 | Manage Sources | `/sources` | Enable/disable and configure plugin sources | Free |
+| Tab Visibility | `/tabs` | Choose which tabs are visible in the header | Free |
+| Notification History | `/notif` | View past notifications and alerts (v2.9.1) | Free |
 
 ## Account Commands
 
@@ -99,7 +101,7 @@ Open the command palette with `/` or `:`, then type to search. Commands requirin
 |---------|----------|-------------|------|
 | Show Help | `/help` | Display keyboard shortcuts help | Free |
 | Exit | `/exit` | Exit Pluginator | Free |
-| Check for Updates | `/update` | Check for Pluginator updates and auto-install | Free |
+| Check for Pluginator Updates | `/selfupdate` | Check if a newer version of Pluginator is available | Free |
 | Show Version | `/version` | Show current version and install method | Free |
 | Environment Info | `/env` | Show current environment and paths | Free |
 | Cache Statistics | `/cachestats` | Show detailed cache statistics and performance | Free |

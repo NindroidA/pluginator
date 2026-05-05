@@ -1,13 +1,13 @@
 # Installation Guide
 
-> **Last Updated:** February 21, 2026
+> **Last Updated:** April 30, 2026
 
 ## Quick Install
 
 ### macOS (Homebrew)
 
 ```bash
-brew tap nindroida/pluginator
+brew tap NindroidA/pluginator
 brew install pluginator
 ```
 
@@ -31,13 +31,13 @@ sudo dpkg -i pluginator-linux-x64.deb
 ### Any Platform (npm)
 
 ```bash
-npm install -g pluginator
+npm install -g @nindroidsystems/pluginator
 ```
 
 ### Any Platform (Bun)
 
 ```bash
-bun install -g pluginator
+bun install -g @nindroidsystems/pluginator
 ```
 
 ## Downloads
@@ -70,10 +70,10 @@ https://github.com/NindroidA/pluginator/releases/latest
 
 ```bash
 # Download (replace version and platform)
-curl -LO https://github.com/NindroidA/pluginator/releases/latest/download/pluginator-2.3.0-linux-x64.tar.gz
+curl -LO https://github.com/NindroidA/pluginator/releases/latest/download/pluginator-2.11.61-linux-x64.tar.gz
 
 # Extract
-tar -xzf pluginator-2.3.0-linux-x64.tar.gz
+tar -xzf pluginator-2.11.61-linux-x64.tar.gz
 
 # Move to PATH
 sudo mv pluginator-* /usr/local/bin/pluginator
@@ -98,7 +98,7 @@ pluginator --version
 
 Expected output:
 ```
-pluginator v2.3.0
+pluginator v2.11.61
 ```
 
 ## Requirements
@@ -123,25 +123,27 @@ Quick reference:
 
 | Install Method | Update Command |
 |----------------|----------------|
-| npm | `npm update -g pluginator` |
-| Bun | `bun update -g pluginator` |
+| npm | `npm update -g @nindroidsystems/pluginator` |
+| Bun | `bun update -g @nindroidsystems/pluginator` |
 | Homebrew | `brew upgrade pluginator` |
 | Scoop | `scoop update pluginator` |
 | .deb | Download new `.deb` from releases |
 | Binary | Re-run install script or download new release |
+
+You can also run `/update` from inside the UI (or `pluginator self-update` from the CLI) to auto-install the latest release for your install method.
 
 ## Uninstalling
 
 ### npm
 
 ```bash
-npm uninstall -g pluginator
+npm uninstall -g @nindroidsystems/pluginator
 ```
 
 ### Bun
 
 ```bash
-bun remove -g pluginator
+bun remove -g @nindroidsystems/pluginator
 ```
 
 ### Homebrew
@@ -212,7 +214,7 @@ npm install -g pluginator --prefix ~/.local
 
 ```bash
 # Re-add the tap
-brew tap nindroida/pluginator
+brew tap NindroidA/pluginator
 
 # Update Homebrew
 brew update

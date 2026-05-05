@@ -1,9 +1,11 @@
 # Pluginator Error Codes
 
-> **Last Updated:** February 21, 2026
-> **Version:** 2.3.0
+> **Last Updated:** April 30, 2026
+> **Version:** 2.11.61
 
 This document describes all error codes used by Pluginator. Each error includes its PLG code, string code, when it occurs, and how to resolve it.
+
+The canonical mapping lives in [src/core/errors/error-codes.ts](src/core/errors/error-codes.ts). The numeric suffix is derived from each code's position within its category list — adding or reordering a code in `CODE_ORDER` will renumber subsequent codes.
 
 ---
 
@@ -65,6 +67,7 @@ Use the PLG code to quickly find the error in this document. The numbering follo
 | PLG-7003 | workflow | UPDATE_CHECK_FAILED | Failed to check for updates. |
 | PLG-7004 | workflow | BACKUP_FAILED | Failed to create backup. |
 | PLG-7005 | workflow | ROLLBACK_FAILED | Failed to rollback. |
+| PLG-7006 | workflow | UNEXPECTED_ERROR | Unexpected workflow error. |
 | PLG-8001 | security | INTERNAL_ADDRESS | Internal addresses not allowed. |
 | PLG-8002 | security | PRIVATE_IP | Private IP ranges not allowed. |
 | PLG-8003 | security | INVALID_PROTOCOL | Only HTTP/HTTPS allowed. |
@@ -419,7 +422,7 @@ Source errors occur when interacting with plugin repositories.
 **User Message:** `[PLG-4004] Source type not supported: <source>.`
 
 **Resolution:**
-- Check supported sources: modrinth, spigot, github, curseforge, hangar, jenkins, bukkit, web-manifest
+- Check supported sources: spigot, modrinth, github, bukkit, jenkins, hangar, geysermc, web (manifest), curseforge, ninsys, manual
 - Update plugin configuration to use supported source
 
 **Context Fields:**
@@ -574,6 +577,7 @@ Workflow errors occur during multi-step operations.
 | PLG-7003 | `UPDATE_CHECK_FAILED` | Could not check for updates | Yes |
 | PLG-7004 | `BACKUP_FAILED` | Backup creation failed | Yes |
 | PLG-7005 | `ROLLBACK_FAILED` | Could not restore previous version | Yes |
+| PLG-7006 | `UNEXPECTED_ERROR` | Workflow hit a generic uncategorized failure | Yes |
 
 ### PLG-7001 — SYNC_FAILED
 
@@ -661,6 +665,22 @@ Workflow errors occur during multi-step operations.
 - `operation`: "rollback"
 - `pluginName`: Plugin being rolled back
 - `backupPath`: Path to backup file
+
+### PLG-7006 — UNEXPECTED_ERROR
+
+**When it occurs:**
+- A workflow caught an error that didn't match any known category
+- Used as the fallback bucket inside `toPluginatorError()` when no typed signal can classify the failure
+
+**User Message:** `[PLG-7006] An unexpected workflow error occurred.`
+
+**Resolution:**
+- Check logs for the underlying cause (the original error is preserved as `error.cause` since v2.11.1)
+- Retry the operation
+- File a bug report with PLG code and stack trace if reproducible
+
+**Context Fields:**
+- `operation`: The originating workflow
 
 ---
 
